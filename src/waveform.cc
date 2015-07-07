@@ -162,6 +162,7 @@ wavefm::wavefm(voice *v)
 	samp_rate = v->inv_sampling_rate;
 //	samp_size_bytes = sizeof(SAMPLE);
 	channel = v->channel;
+//	channel = CT_RIGHT;
 	int stereo = channel == CT_MONO ? 0 : 1;
 	if (this_voice->sample_size <= 0 || (this_voice->sample_size >> 3) > (signed)sizeof(int))
 		shriek(447, "Invalid sample size %d", this_voice->sample_size);
@@ -571,10 +572,13 @@ wavefm::attach(int d)
 	if (ioctlable(fd)) {
 		ioctl_attach();
 	}
-	D_PRINT(0, "(attached, now flushing predata)\n");
+	D_PRINT(2, "(attached, now flushing predata)\n");
 	if (hdr.buffer_idx) flush();
-	D_PRINT(0, "(predata flushed)\n");
-	if (buff_size) buffer = buffer ? (SAMPLE *)xrealloc(buffer, buff_size * sizeof(SAMPLE)) : (SAMPLE *)xmalloc(buff_size * sizeof(SAMPLE));
+	D_PRINT(2, "(predata flushed)\n");
+/*	if (buff_size) {
+		D_PRINT(2, "Resizing buffer to %d\n", buff_size* sizeof(SAMPLE));
+	    buffer = buffer ? (SAMPLE *)xrealloc(buffer, buff_size * sizeof(SAMPLE)) : (SAMPLE *)xmalloc(buff_size * sizeof(SAMPLE));
+}*/
 }
 
 void
@@ -684,7 +688,7 @@ wavefm::force_little_endian_header()
 	hdr.buffer_idx = to_le32s(hdr.buffer_idx);
 }
 
-#define put_sample(sample) *(int *)newbuff = sample, newbuff += ssbytes;
+#define put_sample(sample) *((short*)newbuff) = sample, newbuff += ssbytes;
 
 inline void
 wavefm::translate_data(char *newbuff)
@@ -700,10 +704,12 @@ wavefm::translate_data(char *newbuff)
 	int shift2 = (scfg->_big_endian && native_byte_order) ? 0 : (sizeof(int) - ssbytes) << 3;
 	int unsign = ssbytes == 1 ? 0x80 : 0;
 
-
+	D_PRINT(2, "ssbytes: %d, idx %d\n", ssbytes, hdr.buffer_idx);
+	char *newbuff_start = newbuff;
 	for (int i = 0; i < hdr.buffer_idx; i += downsamp) {
-		int sample = buffer[i];
-		if (ulaw) {		// Convert from 16 bit linear to ulaw. 
+//		D_PRINT(2, "Idx: %d\n", i);
+		short sample = buffer[i];
+		/*(ulaw) {		// Convert from 16 bit linear to ulaw. 
 			int sign = (sample >> 8) & 0x80;          
 	                if (sign) sample = -sample;              
 	                int exponent = exp_lut[(sample >> 7) & 0xFF];
@@ -713,8 +719,8 @@ wavefm::translate_data(char *newbuff)
 			sample <<= shift1;
 			sample >>= shift2;
 			sample += unsign;
-		}
-		sample = native_byte_order ? sample : to_le32s(sample);
+		}*/
+		//sample = native_byte_order ? sample : to_le32s(sample);
 		switch(channel)
 		{
 			case CT_MONO:	put_sample(sample); break;
@@ -723,19 +729,22 @@ wavefm::translate_data(char *newbuff)
 			case CT_BOTH:	put_sample(sample); put_sample(sample); break;
 		}
 	}
+	D_PRINT(2, "Translate data channel %d, added: %d bytes", channel, newbuff-newbuff_start);
 }
 
 void
 wavefm::translate()
 {
-	D_PRINT(1, "Translating waveform, buffer_idx=%d\n", hdr.buffer_idx);
+	D_PRINT(2, "Translating waveform, buffer_idx=%d, channel %d\n", hdr.buffer_idx, channel);
 	if (!hdr.buffer_idx) {
 		force_little_endian_header();
 		translated = true;
 	}
+	D_PRINT(2, "Translate 1\n");
 	if (translated) {
 		return;
 	}
+        D_PRINT(2, "Translate 2\n");
 
 #ifdef WANT_PORTAUDIO_PABLIO
 	/*
@@ -757,12 +766,14 @@ wavefm::translate()
 		}
 	}
 #endif
-	
+	D_PRINT(2, "Translate 3\n");
 	int working_size = sizeof(SAMPLE);
 	working_size *= downsamp;
 
 	int target_size = (this_voice->sample_size + 7) >> 3;
 	target_size *= (1 + (channel != CT_MONO));
+
+	D_PRINT(2, "Translate 4\n");
 
 	D_PRINT(1, "Downsampling by %d, each %d byte frame becomes %d bytes\n", downsamp, working_size, target_size);
 	
@@ -773,16 +784,22 @@ wavefm::translate()
 		if (downsamp == 4) band_filter(downsamp);	//output is downsampled
 	}
 	
+	D_PRINT(2, "Translate 5\n");
+	
 	if (downsamp == 1 && working_size == target_size && channel == CT_MONO
 						&& !cfg->ulaw && !scfg->_big_endian) goto finis;
 	if (true || working_size < target_size) {	/* see put_sample() to appreciate the risks of doing the translation in situ */
 		char *newbuff = (char *)xmalloc(hdr.buffer_idx * target_size / downsamp + sizeof(int));
+		D_PRINT(2, "newbuff translate size %d buff %d\n", hdr.buffer_idx * target_size / downsamp + sizeof(int), hdr.buffer_idx);
 		translate_data(newbuff);
 		free(buffer);
 		buffer = (SAMPLE *)newbuff;
+		D_PRINT(2, "buffer: %p - %p\n", buffer, buffer + hdr.buffer_idx * target_size / downsamp + sizeof(int));
 	} else {
 		translate_data((char *)buffer);		// strange semantics
 	}
+
+	D_PRINT(2, "Translate 6\n");
 	
 	if (this_voice->out_sampling_rate) samp_rate = this_voice->out_sampling_rate;
 	hdr.sf1 = samp_rate;		if (hdr.sf2) hdr.sf2 = hdr.sf1;
@@ -790,8 +807,9 @@ wavefm::translate()
 	hdr.alignment = target_size;	hdr.samplesize = this_voice->sample_size;
 	if (cfg->ulaw) hdr.datform = IBM_FORMAT_MULAW;
    finis:
-	D_PRINT(0, "Setting buffer_idx to %d\n", hdr.buffer_idx);
+	D_PRINT(2, "Translate 7\n");
 	hdr.buffer_idx = (hdr.buffer_idx + 1) / downsamp * target_size;
+	D_PRINT(2, "Setting buffer_idx to %d\n", hdr.buffer_idx);
 	force_little_endian_header();
 	translated = true;
 }

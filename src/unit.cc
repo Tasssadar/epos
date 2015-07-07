@@ -39,6 +39,7 @@ SLABIFY(marker, marker_slab, 2048, shutdown_unit_markers)
 
 unit::unit(UNIT layer, parser *parser)
 {
+	sharpcnt = 0;
 	next = prev = firstborn = lastborn = father = NULL;
 	depth = layer;
 	cont = NO_CONT;
@@ -338,8 +339,14 @@ void
 unit::insert(UNIT target, bool backwards, char what, charclass *left, charclass *right)
 {
 	unit *tmpu;
-
+	static int sharpcnts = 0;
 	if (depth == target) {
+		if(what == '#') {
+			if(++sharpcnts >= 350)
+				return;
+		} else {
+			sharpcnts = 0;
+		}
 		D_PRINT(1, "inner unit::insert %c %c %c\n",Prev(depth)->inside_or_zero(), cont, Next(depth)->inside_or_zero());
 		D_PRINT(1, "   env is %c %c\n",
 				left->ismember(Prev(depth)->inside())+'0',

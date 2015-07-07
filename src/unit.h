@@ -48,6 +48,7 @@ class unit
 	unit *firstborn, *lastborn;       //layer lower by one
 	unit *father;                     //layer greater by one
 	UNIT depth;        // 0=segment 1=phone 2=syllable 3=word...
+	int sharpcnt;
 	bool scope;                       //true=don't pass on Next/Prev requests
 	short int  cont;         // content (or terminating character)
 	void insert_begin(unit *member, unit*to);         //insert a train of units

@@ -723,7 +723,7 @@ void a_input::run()
 				encode_string((char *)inb, this_lang->charset, false);
 			default: ;	/* otherwise no problem */
 		}
-		D_PRINT(2, "Read and about to process %s\n", (char *)dta);
+		D_PRINT(2,"Read and about to process %s\n", (char *)dta);
 		inb = NULL;
 		toread = 0;	// superfluous
 		offset = 0;	// superfluous

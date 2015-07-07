@@ -72,7 +72,7 @@ parser::init()
 
 	for(i = 0; i < txtlen; i++)
 		text[i] = transl_input[mode][text[i]];
-	D_PRINT(1, "Parser: has set up with %s\n", text);
+	D_PRINT(2, "Parser: has set up with %s %d\n", text, txtlen);
 	current = text; 
 //	current--;
 //	do level = chrlev(*++current); while (level > scfg->_phone_level && level < scfg->_text_level);
@@ -133,18 +133,19 @@ parser::gettoken()
 	unsigned char ret = token;
 	do {
 		token = identify_token();
+		D_PRINT(1, "Token: %c\n", token);
 		if (char_level[token] == U_ILL && cfg->relax_input)
 			token = cfg->default_char;
 		level = chrlev(token);
 		if (is_garbage(level, lastlev, depth) && strchr(downgradables, token)) {
 			level = scfg->_phone_level; 
-			D_PRINT(0, "Parser downgrading %c\n", token);
-		} else D_PRINT(0, "Parser not downgrading %c\n", token);
+			D_PRINT(1, "Parser downgrading %c\n", token);
+		} else D_PRINT(1, "Parser not downgrading %c\n", token);
 		t = 1;
 		current++;
 	} while (is_garbage(level, lastlev, depth));
 		// (We are skipping any empty units, except for phones.)
-	D_PRINT(0, "Parser: char requested, '%c' (level %u), next: '%c' (level %u)\n", ret, lastlev, *current, level);
+	D_PRINT(2, "Parser: char requested, '%c' (level %u), next: '%c' (level %u)\n", ret, lastlev, *current, level);
 
 	return ret;
 }

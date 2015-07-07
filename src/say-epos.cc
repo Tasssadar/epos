@@ -122,7 +122,7 @@ char *get_data()
 	size = 0;
 	while (sgets(scratch, scfg->scratch_size, ctrld)) {
 		scratch[scfg->scratch_size] = 0;
-		if (debug_ttscp) printf("Received: %s\n", scratch);
+		printf("Received: %s\n", scratch);
 		if (strchr("2468", *scratch)) { 	/* all done, write result */
 			if (*scratch != '2') shriek(scratch);
 			if (!size) shriek("No processed data received");
@@ -233,9 +233,9 @@ void restart_epos()
 
 void send_option(const char *name, const char *value)
 {
-	if (debug_ttscp) {
+	//if (debug_ttscp) {
 		printf("setl %s %s\n", name, value);
-	}
+	//}
 	xmit_option(name, value, ctrld);
 	get_result(ctrld);
 }

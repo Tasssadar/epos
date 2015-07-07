@@ -885,8 +885,10 @@ r_regress::apply(unit *root)
 {
 	root->assim(target,backwards,fn,ltab,rtab);
 
-	if (fn->xlat(JUNCTURE) != JUNCTURE)
+	if (fn->xlat(JUNCTURE) != JUNCTURE) {
+		D_PRINT(1, "Insert root %c\n", fn->xlat(JUNCTURE));
 		root->insert(target, backwards, fn->xlat(JUNCTURE), ltab, rtab);
+	}
 }
 
 /************************************************
