@@ -1,0 +1,21 @@
+near  *ivxlcdmIVXLCDM\Z
+{
+	regress  IVXLCDM>ivxlcdm(!_!)
+	regex   /^(m\{0,9\}([ixc][dm]\|d\?c\{0,4\})([ix][lc]\|l\?x\{0,4\})(i[xv]\|v\?i\{0,4\})\Z\?)\$/\1R/
+	regex   /^(([ivxlcdm]\|.*i[^i].*i.*\|.*x[^xi].*x.*\|.*c[^cxi].*c.*)\Z\?)R\$/\1/
+	near   R
+	{
+		regress  R>0(!_!)
+		subst   "iv,iiii  ix,viiii  il,xxxxix  ic,xcix  id,cdxcix  im,cmxcix  xl,xxxx  xc,lxxxx  xd,cccclxxxx  xm,cmxc  cd,cccc  cm,dcccc"
+		near *!cd
+			regex   /(m)([lx])/\10\2/
+			regex   /(m)([vi])/\100\2/
+			regex   /(m)\$/\1000/
+		near *!xl0
+			regex   /([cd])([vi])/\10\2/
+			regex   /([cd])\$/\100/
+		near *!iv0
+			regex	/([xl])\$/\10/
+		subst  ../slovak/roman.dic
+	}
+}

@@ -1,0 +1,9 @@
+Show the current value for an operating parameter.
+It is also possible to view the current language or voice
+as well as the list of all available languages or voices.
+show language
+show voice
+show languages
+show voices
+Some parameters can be shown only under a specific
+authentication status.

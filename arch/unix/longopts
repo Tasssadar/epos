@@ -1,0 +1,7 @@
+#!/bin/sh
+
+cat ../src/options.lst \
+|sed 's/"[^"]*")/)/g'\
+|tee tmp00\
+|sed s,\",/,g\
+| awk -F/ '/^OPTION/{if ($2) printf("--%-20s%s\n",$2,$5);}'

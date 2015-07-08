@@ -1,0 +1,40 @@
+The Mac OS X build requires the Portaudio library. It's rather in early
+development stage and some integration details are still undecided.
+
+Building and installing the current version of Epos on Mac OS X:
+================================================================
+
+ 1. download a fixed version of Portaudio 18 from here:
+
+	http://lokisw.com/download.php/en/portaudio-18-2005-03-18-fixed.tar.gz
+
+ 2. follow the steps in libs/portaudio/README (Epos sources)
+ 3. ./configure --enable-portaudio
+ 4. make
+ 5. make install   (with sufficient rights to install cfg files under /usr/local/share/epos)
+ 6. install speech segment inventories (see cfg/inv/README for an explanation;
+	untar them starting from /usr/local/share/epos/inv)
+
+Running on Mac OS X:
+====================
+
+ eposd       starts a speech daemon  
+ say-epos    controls this daemon, e.g. "say-epos 'Some text'" means "tell eposd to
+	     say 'some text'".
+
+These binaries are in /usr/local/bin, depending on your $PATH settings you may have to
+invoke /usr/local/bin/eposd and /usr/local/bin/say-epos respectively.
+
+Texts to say should presently be in ISO Latin 2.  For example:
+
+ /usr/local/bin/say-epos --voice kubec-vq Ahoj.
+
+ /usr/local/bin/say-epos --voice vichova-vq
+	`echo -n "STRING_WITH_DIACRITICS_ENTERED_AT_A_TERMINAL" |
+	iconv -f UTF-8 -t ISO-8859-2`
+
+See Also
+========
+
+WELCOME (in this directory)
+

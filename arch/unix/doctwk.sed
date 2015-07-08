@@ -1,0 +1,9 @@
+/hline/bhline
+x
+b
+:hline
+H
+x
+s/\n//
+x
+d

@@ -1,0 +1,6 @@
+Set an operating parameter to the value specified.
+It is also possible to set the current language or
+the current voice. Note that some parameters may have
+access restrictions configured for security reasons
+and that only the current session is affected.  Setting
+some parameters may imply arbitrary side effects.

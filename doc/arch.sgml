@@ -1,0 +1,58 @@
+<sect> Architecture
+<p>
+
+To avoid a trade-off between efficiency and configurability
+Epos uses the client-server model of operation.  All interesting
+processing happens at the server, so the name Epos really
+refers to the background server process and not to the
+clients.  (In fact, some users who use Epos for production work
+wrote their own specialized clients.)
+
+When you start Epos, it goes through the initialization phase,
+in which it interprets the server command line and accesses
+the file system to read a number of configuration files
+(in the order of hundreds in the distributed configuration);
+most of this process consists of setting options and of
+parsing transformation rules for the text-to-speech conversion for each
+configured language.  It is possible to configure Epos so that
+after the initialization phase it doesn't use the file system at all; by
+default the loading of a few types of information is delayed
+up to the point when that information is first used.
+Almost all of the configuration is provided through
+text files which are parsed into an efficient internal form.
+
+After the initialization phase is over, Epos becames an
+OS service or daemon, listening on a TCP port for new TTSCP
+connections; TTSCP is the only protocol Epos uses
+for passing both control information and data.
+There is no principial limit on the number of simultaneously
+connected clients or served requests and the configuration
+structures for all clients are fully independent.
+
+The most common task for Epos is a text to speech conversion.
+Every client can decide (requesting different TTSCP streams)
+whether the resulting speech should be sent back through
+a data connection or whether the server should pass it directly
+to the operating system audio output interface.
+Apart from debugging and logging output this is the
+only exception from the rule that TTSCP is the only
+output channel for Epos (and basically the only input
+channel, too).
+
+This is the minimum you have to know about Epos to 
+run it.  The following sections are harder to read,
+but they include all the details.  The sections
+on the rules and especially on the options describe
+both the overall structure of Epos configuration
+and the details about specific functionality.
+The section on TTSCP is very stable (we do not attempt
+to keep Epos backwards compatible in details, but
+we do keep TTSCP backward compatible) and includes
+everything you need to write your own TTSCP client.
+The sections on administration (logging messages
+and security issues) summarize relevant information
+from previous sections.  The section on development
+is a starting point for contributing to the Epos project
+and also includes some technical details concerning
+portability.
+

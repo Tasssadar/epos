@@ -1,0 +1,18 @@
+near o	colon
+{
+	regress  ~_\ >w(!_!)      colon   word
+	postp    "w"              word    word
+	regress  w>~(!_!)         word    word
+	progress |_>D(!_!)        syll    syll
+	progress 0>C(!uioea_0)   syll
+	raise    C                syll
+	regress  C>0(!_!)
+	syll     C<D              word    syll
+}
+
+near u   colon
+{
+	raise BL		  syll
+	subst relabel.dic	  word   syll
+	progress BL>0(!_!)	  word   phone
+}

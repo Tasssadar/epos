@@ -1,0 +1,107 @@
+#
+#	(c) Jirka Hanika <geo@ff.cuni.cz>
+#       (c) Martin Petriska <petriska@pobox.sk>
+# Pravidla pro zpracování slovenèiny
+
+$invent_dir	external
+#$prosody_dir	external
+#$base_dir	external
+#$dph_file	external
+
+
+#$inv_dph =	$dph_file
+
+#$prosody   = ${base_dir}/${prosody_dir}
+#$dph_file  = ${base_dir}/${invent_dir}/${inv_dph}
+
+$prosody = ../czech/prosody
+
+#include "trans.rul"
+
+ inside  .?:!	sent		; Pochybné - nemá zasáhnout vìty bez interpunkce
+ {
+	 prosody	$prosody/accent.dic      word	syll
+ }
+
+ inside  ,    colon
+ {
+	prosody	  $prosody/nonterm.dic	colon	phone
+#	smooth	f/5/40\35\15\5			colon   syll
+ }
+
+ if      irony		sent
+ {
+	inside  ,- colon		; tohle nefunguje rozumnì
+	{
+		prosody  $prosody/ir_unter.dic colon phone
+#		debug pause
+		smooth f/10/20/40\20\10		word	phone
+	}
+	regress   _>L(!_0)			sent    word
+	inside	  L				word	        ; poslední slovo
+	{
+		prosody	  $prosody/irony.dic	word	syll
+	}
+	regress   L>_($everywhere) 		sent	word
+ }
+
+ inside  .:\~   sent    ; Následující jen pro oznamovací vìty a doplòovací otázky
+ {
+	inside   :   sent
+	{
+		prosody   $prosody/wh.dic		sent	syll
+	}
+#	prosody   ${prosody}/fadeoutp.dic	sent	phone
+	prosody   ${prosody}/fadeouts.dic	sent	syll
+
+	inside    .   sent
+	{
+		prosody   $prosody/fadeoutw.dic	sent	word
+	}
+
+	smooth	f/30/40\30			word	phone
+ }
+
+ inside   ?	sent	; Následující jen pro otázky zji¹»ovací
+ {
+	prosody   $prosody/fadeoutp.dic	sent	phone
+	prosody	  $prosody/fadeoutw.dic	sent	word
+
+
+	regress   _>L(!_0)			sent    word
+	inside	  L				word	        ; poslední slovo
+		{
+		regress   _>L(0_0)		word	syll	; monosylabon
+		inside    L			syll
+		{
+			prosody   $prosody/questend.dic	syll	phone
+		}
+		regress   L>_($everywhere)	word	syll
+		smooth	  f/20/30\30\20		word	phone
+
+		prosody	  $prosody/questup.dic	word	syll
+		smooth	f/5/5/15/25/40\10	word	phone
+	}
+	regress   L>_($everywhere) 		sent	word
+
+ }
+
+ inside   \!	sent	; Vìtný dùraz pro vìty s vykøièníkem
+ {
+	prosody   $prosody/exclaim.dic	sent	word
+	prosody   $prosody/exclafad.dic	sent	syll
+ }
+
+regress   0>\#(!_0)	colon	; vlo¾ení pausy
+
+if   kadlec_dph
+	segments  ../czech/kadlec.dph   colon
+if  !kadlec_dph
+	segments  traditnl.dph colon
+
+# smooth    f/10/80\10	text segment
+
+
+;--------------------  debug     elem,pause text
+
+

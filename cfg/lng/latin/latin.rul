@@ -1,0 +1,85 @@
+#
+#	(c) 2005  Jirka Hanika
+#
+#	See latin.ini for the available pronunciation variants.
+#
+
+@include "trans.rul"
+
+if prosody
+{
+	if bang_nnet
+	{
+		if lpcprosody
+		{
+			nnet prosody_lpc_bang.neu sent syll
+		}
+		if !lpcprosody
+			nnet prosody_bang.neu sent syll
+	}
+	if !bang_nnet
+	{
+		@include "stress.rul"
+
+		if lpcprosody
+		{
+			@include "lpcpros.rul"
+		}
+		if !lpcprosody
+		{
+			@include "prosody.rul"
+		}
+	}
+}
+
+#if    phr_break
+{
+	regress   0>\#(!_0)	colon	; vlo¾ení pausy
+	5x  regress   0>\#(!_0)	sent	; vlo¾ení pausy
+	inside	\#	phone
+	{
+		contour   t/-65   phone
+		contour   i/-99   phone
+	}
+}
+
+if generate_segs
+{
+    if traditional_dph
+			segments  traditnl.dph	colon
+    if !traditional_dph
+    {
+	if ptacek97_dph
+			segments  ptacek97.dph  colon
+	if !ptacek97_dph
+	{
+	  if dubeda_dph
+			segments  dubeda.dph	colon
+	  if !dubeda_dph
+	  {
+	    if betty_dph
+	    {
+			@include "betty.rul"
+			if class_dph
+			{
+				segments classical.dph
+			}
+			segments  betty.dph	colon
+	    }
+	    if !betty_dph
+	    {
+			fail "No segment set specified"
+	    }
+	  }
+	}
+    }
+}
+
+
+if  absolute_time
+{
+	absolutize	../czech/machac_seg.tim
+	progress	\#>_(!_!)	# pause renaming hack
+}
+
+

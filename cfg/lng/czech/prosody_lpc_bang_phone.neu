@@ -1,0 +1,32 @@
+<trainingData>
+	<comment> Vstupy pro slabiky, dne 19.4.2002 </comment>
+
+	<epos_nn value = "nnet/lpcbangphone.txt"/>
+	<epos_log value = "neurallog.txt"/>
+
+	<columns>
+		<default>
+			<type value="float"/>
+			<use value="input"/>
+			<translate value="linear"/>
+			<window><left value="1"/><right value="1"/></window>
+		</default>
+		<column><use value="no"/><epos_loglevel value="phone"/></column>
+		<column><epos value='count("syll","word") == 1 # monosylaba, zopakuj pro 4 sousedy vlevo a 2 vpravo '/></column>
+		<column><epos value='count("syll","word") # poèet slabik ve slovì '/></column>
+		<column><epos value='index("syll","word") / count("syll","word") # poøadí slabiky ve slovì '/></column>
+		<column><epos value='index("word","colon") == 1 AND count("word","sent") > 1 # iniciální takt, ale nikoli izolovaný '/></column>
+		<column><epos value='index("word","colon") == count("word","colon") AND count("word","sent") > 1 # terminální takt, ale nikoli izolovaný '/></column>
+		<column><epos value='count("word","colon") '/></column>
+		<column><epos value='index("word","colon") / count("word","colon") '/></column>
+		<column><epos value='count("phone","syll") '/></column>
+		<column><epos value='index("phone","syll") / count("phone","syll") '/></column>
+		<column><epos value='index("syll","word") == 1 # pøízvuk na první slabice '/></column>
+		<column><use value="output"/><epos_output value='frequence'/>
+			<epos value='neural(this,0)'/>
+			<window><left value="0"/><right value="0"/></window>
+		</column>
+	</columns>
+    <series value="1"/>
+	<seriesSeparator value="------------------------------------------"/>
+</trainingData>

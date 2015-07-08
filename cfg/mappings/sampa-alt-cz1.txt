@@ -1,0 +1,26 @@
+@include "sampa-std.txt"
+
+# This alternative SAMPA-like notation has to be used e.g. with cz1.
+
+# misnamed sounds:
+
+0x0063	c
+0x0068	h
+0x0165	T
+0x010F	D
+0x0148	N
+0x0159	r\\
+0x0158	r\\
+
+
+# missing sounds:
+
+0x0027	_
+0x010D	t_S
+0x0041	a_u
+0x0045	e_u
+0x004F	o_u
+0x005A	d_z
+0x017D	d_Z
+0x004D	m
+0x004E	n

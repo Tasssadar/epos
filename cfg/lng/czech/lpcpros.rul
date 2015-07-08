@@ -1,0 +1,307 @@
+#
+#	prosodická pravidla pro modelování prùbìhu základního tónu
+#	pomocí lineárnì predikèního modelu
+#
+#	(trvání dle Fonetického ústavu FF UK pro èe¹tinu, 1998)
+#
+#	(c) 1998-2002  Petr Horák
+#	(c) 1998-2002  Jirka Hanika
+#	(c) 1998       FF UK
+#
+
+#
+# Oznaèení koncù otázek doplòovacích
+#
+
+inside	:	sent
+{
+	regress	T>D(!_0)	sent	word
+}
+
+#
+#  Nyní máme oznaèeny takty I, M, P, F, T a D a pøiøazeny kadence.
+#
+
+#
+#  pøi pøiøazování kadencí se hodnota pøiøazená slabice
+#  vztahuje na v¹echny její hlásky v pou¾itém slabièném
+#  èlenìní
+#
+
+#
+# oznaèení zaèátku vìty pro syntezátor
+#
+
+inside	.:!	sent
+{
+		contour  i/1000:0*	sent  phone
+}
+
+#
+# Slabièné buzení iniciálních a mediálních taktù
+#
+
+inside	IaA	word
+{
+	<	word  syll	; tzn. zaøiï se dle poètu slabik v taktu
+		{					; monosylaba
+			;
+		}
+		[					; disyllaba
+			contour	 f/+5:0			word   syll
+		]
+		[					; trisyllaba
+			contour	 f/+8:0:0		word   syll
+		]
+		[					; tetrasyllaba
+			contour	 f/+10:0:0:0		word   syll
+		]
+		[					; pentasyllaba
+			contour	 f/10:0:0:0:0		word   syll
+		]
+		[
+			contour  f/10:0:0:0*:0:0	word   syll
+		]
+	>
+}
+
+#
+# Slabièné buzení mediálních taktù
+#
+
+inside	bB	word
+{
+	<	word  syll
+		{
+			;
+		}
+		[					; disyllaba
+			contour  f/30:0 		word   syll
+			contour  f/15:0 		word   syll
+			contour  f/-10:0		word   syll
+		]
+		[
+			contour  f/+35:-5:+0		word   syll
+			contour  f/+17:-5:+0		word   syll
+			contour  f/-17:-5:+0		word   syll
+		]
+		[
+			contour  f/+45:-5:0:+0		word   syll
+			contour  f/+20:-5:0:+0		word   syll
+			contour  f/-20:-5:0:+0		word   syll
+		]
+		[
+			contour  f/+45:-5:0:+0:+0	word   syll
+			contour  f/+20:-5:0:+0:+0	word   syll
+			contour  f/-20:-5:0:+0:+0	word   syll
+		]
+		[
+			contour  f/+45:-5:0:0*:0:+0   	word   syll
+			contour  f/+20:-5:0:0*:0:+0   	word   syll
+			contour  f/-20:-5:0:0*:0:+0   	word   syll
+		]
+	>
+}
+
+#
+# Slabièné buzení posledního taktu intonaèního úseku
+#
+
+inside	F	word
+{
+	contour   f/-5	word  word
+	<		word  syll
+		{
+			;
+		}
+		[					; disyllaba
+			contour  f/-10:0		word   syll
+		]
+		[
+			contour  f/-12:-6:+0		word   syll
+			contour  f/-20:-6:+0		word   syll
+		]
+		[
+			contour  f/-15:-8:0:0		word   syll
+			contour  f/-25:-8:0:0		word   syll
+		]
+		[
+			contour  f/-16:-10:+0:+0:+0	word   syll
+			contour  f/-30:-10:+0:+0:+0	word   syll
+		]
+		[
+			contour  f/-20:+0:-0:-0*:-4:-0	word   syll
+			contour  f/-30:+0:-0:-0*:-0:-0	word   syll
+			; pravidla zde mají prázdnou nabídku :-)
+		]
+	>
+}
+
+inside	?J	sent
+{
+	regress   T>Q(!_!)	word   word
+}
+
+#
+# Slabièné buzení posledního taktu oznamovací vìty
+#
+
+inside	T	word
+{
+	contour   f/+5	word  word
+	<		word  syll
+		{
+			;
+		}
+		[
+			contour  f/-25:-50		word   syll
+			contour  f/-50:-60		word   syll
+		]
+		[
+			contour  f/-25:-20:-50		word   syll
+			contour  f/-50:-30:-60		word   syll
+		]
+		[
+			contour  f/-25:-15:-15:-50	word   syll
+			contour  f/-50:-20:-20:-60	word   syll
+		]
+		[
+			contour  f/-25:-12:-12:-17:-50	word   syll
+			contour  f/-50:-17:-17:-25:-60	word   syll
+		]
+		[
+			contour  f/-25:-10:-10:-10*:-15:-50	word   syll
+			contour  f/-50:-15:-15:-15*:-20:-60	word   syll
+		]
+	>
+}
+
+#
+# Slabièné buzení posledního taktu otázky doplòovací
+#
+
+inside	D	word
+{
+	contour   f/+5	word  word
+	<		word  syll
+		{
+			;
+		}
+		[
+			contour  f/-15:0	word   syll
+			contour  f/+15:0	word   syll
+		]
+		[
+			contour  f/-15:0:0	word   syll
+			contour  f/+15:0:0	word   syll
+		]
+		[
+			contour  f/-15:0:0:0	word   syll
+			contour  f/+15:0:0:0	word   syll
+		]
+		[
+			contour  f/-15:0:0:0:0	word   syll
+			contour  f/+15:0:0:0:0	word   syll
+		]
+		[
+			contour  f/-25:0:0:0*:0:0	word   syll
+			contour  f/+25:0:0:0*:0:0	word   syll
+		]
+	>
+}
+
+#
+# Slabièné buzení posledního taktu otázky zji¹»ovací
+#
+
+inside	Q	word
+{
+	contour   f/-5	word  word
+	<		word  syll
+		{
+			;
+		}
+		[
+			contour  f/50:0	word   syll
+		]
+		[
+			contour  f/60:0:0	word   syll
+			contour  f/30:30:0	word   syll
+		]
+		[
+			contour  f/-10:60:0:0	word   syll
+			contour  f/-10:30:30:0	word   syll
+		]
+		[
+			contour  f/-10:0:60:0:0	word   syll
+			contour  f/-10:0:30:30:0	word   syll
+		]
+		[
+			contour  f/-10:0*:60:0:0	word   syll
+			contour  f/-10:0*:30:30:0	word   syll
+		]
+	>
+}
+
+#
+# Slabièné buzení zaèátku otázky doplòovací
+#
+
+inside	:	sent
+{
+	<		sent  syll
+		[
+			contour  f/50	sent   syll
+		]
+		[
+			contour  f/-30:70	sent   syll
+		]
+		[
+			contour  f/-30:70:-10	sent   syll
+		]
+		[
+			contour  f/-30:70:-10:0	sent   syll
+		]
+		[
+			contour  f/-30:70:0:-10:+5	sent   syll
+		]
+		[
+			contour  f/-30:70:0:-10:*:+5	sent   syll
+		]
+	>
+}
+
+#
+#  Buzení úsekové deklinace frekvence (do 11 taktù v úseku)
+#
+
+<  colon  word	; tzn. zaøiï se dle poètu taktù v promluvovém úseku
+    3x	nothing			; jeden a¾ tøi takty se neupravují
+	contour		f/0:-5:-5:-5				colon  word
+	contour		f/0:-5:-5:-5:-5				colon  word
+	contour		f/0:-5:-5:-5:-5:-5			colon  word
+	contour		f/0:-5:-5:-5:-5:-5:-5			colon  word
+	contour		f/0:-5:-5:-5:-5:-5:-5:-5		colon  word
+	contour		f/0:-5:-5:-5:-5:-5:-5:-5:-5		colon  word
+	contour		f/0:-5:-5:-5:-5:-5:-5:-5:-5:-5  	colon  word
+	contour		f/0:-5:-5:-5:-5:-5:-5:-5:-5:-5:-5	colon  word
+	contour		f/0:-5:-5:-5:-5:-5:-5:-5:-5:-5:-5:-5	colon  word
+	nothing
+>
+
+#
+#  Buzení vìtné deklinace frekvence (do 9 úsekù ve vìtì)
+#
+
+<  sent  colon	; tzn. zaøiï se dle poètu promluvových úsekù ve vìtì
+    2x	nothing			; jeden a¾ dva takty se neupravují
+	contour		f/0:-10:-10:				sent  colon
+	contour		f/0:-10:-10:-10				sent  colon
+	contour		f/0:-10:-10:-10:-10			sent  colon
+	contour		f/0:-10:-10:-10:-10:-10			sent  colon
+	contour		f/0:-10:-10:-10:-10:-10:-10		sent  colon
+	contour		f/0:-10:-10:-10:-10:-10:-10:-10		sent  colon
+	contour		f/0:-10:-10:-10:-10:-10:-10:-10:-10	sent  colon
+	nothing
+>
+

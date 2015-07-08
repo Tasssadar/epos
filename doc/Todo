@@ -1,0 +1,43 @@
+This file is not a part of Epos documentation, nor any kind of plan
+for the project.  It is rather a private list of some of the known
+tasks which might be carried out in the future to enhance Epos.
+It is included only to get a feeling what the less research minded one
+of the authors tends to think about.
+-------------------------------------------------------------------
+
+Bugs
+- better prosody modelling for monosyllaba
+- fallbacks may reinterpret segment numbers in the old format
+
+Features
+- pause hierarchy rules
+- parsing rules (e.g. for angle/square brackets,
+  dots as opposed to periods, dollar signs)
+- grammatical marking
+- properly cased ordinal numerals
+- SSML parser
+- asynchronous, more robust tcpsyn
+- tcpsyn - explicit voice options of local server should be used by the remote
+- t i adjustment option
+- TCP wrappers & auth config & /etc/epos.users
+- reasonable logging
+- investigate the optimum pause lengths
+- utf-8
+
+Optimisations
+- sync_soundcard() should be replaced with an asyncro thing
+- eliminate class connection_lost
+- initialiser lists instead of constructor code
+
+Miscelannea
+- examine the --_input_text and --input_file options
+- document waveform labels in ttscp.sgml - waveform format description
+
+Should Check
+- behavior of intr with something other than oa_wavefm (may miss 123 or 122)
+- investigate segment free utterance handling
+- TTSCP error codes, esp. those related to options and values, should be revised
+- what if I change max_line?
+- whether decoding and encoding is properly done for all data types - also cmd_show
+- some characters from mathsign.dic, $, etc. might be misread in some contexts
+- behavior of syll in boundary cases - unit testing

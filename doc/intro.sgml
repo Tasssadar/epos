@@ -1,0 +1,75 @@
+<sect> Introduction
+<p>
+
+In the early nineties, the Institute of Phonetics,
+Faculty of Arts, Charles University, Prague, and the Institute of
+Radio-Engineering and Electronics, Academy of Sciences, Prague,
+had managed to assemble a complete TTS implementation for the
+Czech and Slovak languages, using a linear prediction based
+diphone synthesis.  This TTS engine then served as a base
+for further research and applications in speech synthesis,
+until the source became too large and complicated to be
+easily modified, ported to new hardware or operating system,
+or to be well understood by anybody except the authors.
+By the end of 1995, when a need for testing
+some new prosody modelling hypotheses had arisen, these limitations
+were slowly becoming a major burden. A new implementation of part of
+the system was eventually written from scratch (starting in 1996) and it is
+still expanding, integrating the original results with numerous
+recent improvements. It has been baptized Epos in 1998.
+
+Our primary design goal is to allow the user the ultimate control
+over the TTS processing. We avoid hard-wired constants; we use
+configuration options instead, with sensible default values.
+Most of the language-dependent processing is driven by a <em/rules file/,
+a text file using an intuitive and well-documented syntax. A rules file
+lists the rules to be applied on a written text structure representation
+to yield a corresponding spoken text structure representation (in fact
+it could be the other way round in principle, but somehow no one seems to need that).
+Some aspects of user-definable
+behavior don't fit into the concept of a rules file, and are therefore settable
+with various options in conventional configuration files.  Finally, many other
+external files can be referenced either by the rules file, or a configuration
+file, such as segment inventories or dictionaries.
+
+Most of these files have to be processed before any actual TTS processing
+has finished. That's why Epos is implemented as a background process, i.e.
+as a daemon under UNIX-like OSes and as a service on Windows NT and similar OSes.
+Epos reserves a TCP/IP port for any communication with client applications
+using a custom, quite generic protocol for TTS data flow control, 
+called TTSCP.  A simple TTSCP client utility named <tt/say-epos/ has been provided
+with Epos, but there are many more specialized TTSCP clients in existence.
+
+Epos currently supports several main speech generation algorithms.  
+A linear prediction coding speech synthesizer written by Ellen V&iacute;chov&aacute;
+allows voice inventories as small as 25 kilobytes, whereas much larger
+but high-quality voices are available with a time domain synthesizer.
+Some additional synthesizers not under GPL are used with Epos; you can at
+least use the virtual speech synthesis to synthesize your own texts using
+some of them, if you are connected to the Internet. (Your text is partly
+processed and sent to our server.  Then the generated speech signal is sent
+back to you.)  The last option is to use the semi-free MBROLA speech
+synthesizer, though the MBROLA synthesizer itself is not a part of Epos.
+We are constantly working on improving the synthesizers.
+
+Epos offers several interesting facilities for prosody generation.
+The rule-based (yet surprisingly acceptable) prosody
+based on the prosody research of Zdena Palkov&aacute;
+offers maximum reliability; the highly flexible neural network
+framework developed by Jakub Ad&aacute;mek presents a powerful
+meld of neural network based and rule based tools; and these
+facilities can also serve as a signal source for a linear prediction
+based prosody model implemented by Petr Hor&aacute;k.
+A lot of integration and assessment work in this area has also been
+done by Daniel Sobe.
+
+The name Epos is not an acronym.  It is Greek for...um, go have a look yourself.
+
+This section still has to be (re)written by somebody. At present, try to look at
+<tt> <url url="http://epos.ure.cas.cz"> </tt>
+for additional introductory information or ask the authors by
+<htmlurl url="mailto:geo&commat;cuni.cz" name="email">.
+
+Meanwhile, tell us what kind of introductory information you would like
+to see here.  The documentation is provided for you and we need your feedback.
+

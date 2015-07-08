@@ -1,0 +1,92 @@
+# seznam slov indikujících za pøíslu¹nıch okolností doplòovací otázky
+
+^kdo$	kdoQ
+^koho$	kohoQ
+^komu$	komuQ
+^kom$	komQ
+^kım$	kımQ
+
+^co$	coQ
+^èeho$	èehoQ
+^èemu$	èemuQ
+^èem$	èemQ
+^èím$	èímQ
+
+^èí$	èíQ
+^èího$	èíhoQ
+^èích$	èíchQ
+^èími$	èímiQ
+^èíma$	èímaQ
+
+^kterı$		kterıQ
+^které$		kteréQ
+^která$		kteráQ
+^kterého$	kteréhoQ
+^kterému$	kterémuQ
+^kterou$	kterouQ
+^kterém$	kterémQ
+^kterım$	kterımQ
+^kteøí$		kteøíQ
+^kterıch$	kterıchQ
+^kterejm$	kterejmQ
+^kterımi$	kterımiQ
+^kterejma$	kterejmaQ
+^kterıma$	kterımaQ
+^kterej$	kterejQ
+^kterejch$	kterejchQ
+
+^jakı$		jakıQ
+^jaké$		jakéQ
+^jaká$		jakáQ
+^jakého$	jakéhoQ
+^jakému$	jakémuQ
+^jakou$		jakouQ
+^jakém$		jakémQ
+^jakım$		jakımQ
+^jací$		jacíQ
+^jakıch$	jakıchQ
+^jakejm$	jakejmQ
+^jakımi$	jakımiQ
+^jakejma$	jakejmaQ
+^jakıma$	jakımaQ
+^jakej$		jakejQ
+^jakejch$	jakejchQ
+
+^kolikerı$	kolikerıQ
+^kolikeré$	kolikeréQ
+^kolikerá$	kolikeráQ
+^kolikerého$	kolikeréhoQ
+^kolikerému$	kolikerémuQ
+^kolikerou$	kolikerouQ
+^kolikerém$	kolikerémQ
+^kolikerım$	kolikerımQ
+^kolikeøí$	kolikeøíQ
+^kolikerıch$	kolikerıchQ
+^kolikerejm$	kolikerejmQ
+^kolikerımi$	kolikerımiQ
+^kolikerejma$	kolikerejmaQ
+^kolikerıma$	kolikerımaQ
+^kolikerej$	kolikerejQ
+^kolikerejch$	kolikerejchQ
+
+
+#...plus zapomenuté tvary
+
+^kdy$	kdyQ
+^odkdy$	odkdyQ
+^dokdy$	dokdyQ
+^kde$	kdeQ
+^kudy$	kudyQ
+^odkud$	odkudQ
+^kam$	kamQ
+^kolik$	kolikQ
+^kolika$	kolikaQ
+^zaè$	zaèQ
+^naè$	naèQ
+^jak$	jakQ
+^proè$	proèQ
+^jak¾e$	jak¾eQ
+^jakto¾e$	jakto¾eQ
+^co¾e$	co¾eQ
+^oè$	oèQ
+^proè$	proèQ

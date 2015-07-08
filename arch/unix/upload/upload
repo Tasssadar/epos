@@ -1,0 +1,48 @@
+#!/bin/sh
+
+if [ ! -e src/../Makefile.am -o -z "$1" ]; then
+	echo You shouldn\'t run this script directly.
+	echo Please go to the top source directory and issue \"make upload\"
+	exit 6
+fi
+
+basepath=`( cd .. && echo -n $PWD )`
+release=$1
+
+file=epos-$release.tar.gz
+origpath=$basepath/epos/$file
+uploaddir=$basepath/last_upload
+scriptdir=$basepath/epos/arch/unix/upload
+mailonce=$basepath/epos/mail.once
+sfupload=/usr/local/bin/sf-upload
+changesname=epos-$release/Changes
+
+cd $uploaddir && rm -rf * \
+|| { echo "Directory $uploaddir must exist and be writable" && exit 2; }
+
+cp $origpath . || { echo "I don't see the released file $origpath" && exit 1; }
+cat $file | tar xzOf - $changesname | sed -n -f $scriptdir/lastchanges.sed \
+		>lastchanges && cat $scriptdir/lastchanges.append >>lastchanges
+
+
+cp $mailonce notes \
+|| { echo "File $mailonce should either be 0 bytes long or 20 bytes long" && exit 5; }
+if [ ! -s notes ]; then
+	echo "                                     " >>notes
+fi
+
+cp $sfupload /dev/null || { echo "You need $sfupload installed" && exit 3; }
+$sfupload -pr=epos -p=epos-dev -r=$release -f=$file \
+	-cf=lastchanges nf=notes
+
+echo "Epos version $release has been released to SourceForge." > mailme && \
+echo "Changes from the last version:"                      >> mailme && \
+echo ""                                                        >> mailme && \
+cat lastchanges     >> mailme && \
+cat $scriptdir/mail.append  >> mailme && \
+cat $mailonce    >> mailme && \
+cat mailme | ssh geo@math.cas.cz /bin/mail -I -s "\"Epos $release released\"" epos-dev@speech.cz
+
+mv $mailonce ${mailonce}~ && echo -n "" >$mailonce \
+|| { echo "Failed to reset $mailonce" && exit 4; }
+

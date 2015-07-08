@@ -1,0 +1,55 @@
+
+# These rules should eventually convert numbers to their
+# corresponding Latin numerals.
+#
+# This file is full of uglish hacks. Capital X is used
+# for marking the end of the number throughout, but don't
+# confuse that with \X.
+#
+# We should
+# not use regress and progress rules, as these don't work
+# consistently with zeroes.
+
+regex	/([2-9])([1-9])\Z/\10\Z~\2\Z/	colon	; FIXME: pls elaborate more on it
+
+regex	/([0-9])\ ([0-9][0-9][0-9])/\1\2/	colon
+
+regex	/([0-9])\ ([0-9])/\1\X\2/	colon	; FIXME: comment
+
+regex	/^(0*)0/\1nula|/	word
+
+#	/\m/minus/	colon
+regex   /\\\\$/~nummus~Americánus~/    colon
+regex   /\\^/~téctulum~/   colon
+subst	mathsign.dic	colon
+
+regex	/([0-9])([^X0-9])/\1X\2/	colon
+regex	/([0-9])\$/\1X/		colon
+
+regex	/([1-9][0-9][015-9])([0-9][0-9][0-9]X)/\1~mílle~\2/	colon
+regex	/000([0-9][0-9][0-9]X)/\1/				colon
+regex	/(0\?[0-9][015-9])([0-9][0-9][0-9]X)/\1~mílle~\2/	colon
+
+regex	/([^0-9]\?)1([0-9][0-9][0-9]X)/\1~mílle~\2/		colon
+
+regex	/([0-9]\?[1][234])([0-9][0-9][0-9]X)/\1~mília~\2/	colon
+regex	/([1-9]\?[02-9]\?[234])([0-9][0-9][0-9]X)/\1~mília~\2/	colon
+
+
+# regex	/(1[2-4])([0-9][0-9][0-9]X)/\1~mília~\2/	colon
+regex	/([2-4])([0-9][0-9][0-9]X)/\1~mília~\2/	colon
+regex	/([15-9])([0-9][0-9][0-9]X)/\1~mília~\2/	colon
+
+regex	/([~\ ])0([0-9]*)/\1\2/ colon
+
+regex	/1([0-9][0-9])/~centum~\1/		colon
+regex	/2([0-9][0-9])/~ducentí~\1/	colon
+regex	/([3-9])([0-9][0-9])/\1~centí~\2/	colon
+
+regex	/([2-9])([1-9])/\10~\2/	colon
+
+regex	/X//
+
+subst  basenum.dic
+regex   /0//
+

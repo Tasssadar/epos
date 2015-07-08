@@ -1,0 +1,28 @@
+
+; Smyslem tohoto souboru jest kategorizovat hlásky do ekvivalenèních tøíd 
+; momentálnì vyznávaných neuronovými sítìmi. Jsou nutné pro správnou práci
+; metod implementovaných v nnet.cc
+
+
+#include "slovak.rul"
+
+;#warn Now applying extra nnet rules
+
+ segments ~				; pryè s difony
+
+ regress 0>%(!_0) word			; pøidat na konce slov procentítka
+;dosud: subst  neurpunc.dic  syll
+
+ regress '>0($everywhere) syll		; pryè s rázy
+
+# Pøevody hlásek na typy
+
+ regress	 OAE>U(!_!)		; diftong
+ regress	 $short>A(!_!)		; vokál
+ regress  0>a($long_!)			; rozepsat dlouhé
+ regress  0>a($long_!)			; rozepsat dlouhé
+ regress  $long>A(!_!)			; rozepsat dlouhé
+; nnet_vwl.dic syll			;dosud: subst
+ regress	 $sonant>L(!_!)		; sonorní konsonant
+ regress	 $voiced>B(!_!)		; znìlý konsonant
+ regress	'$voiceless>P(!_!)	; neznìlý konsonant

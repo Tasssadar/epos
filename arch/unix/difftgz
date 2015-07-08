@@ -1,0 +1,31 @@
+#!/bin/sh
+
+WORK=/tmp/diff-eposes-delme
+
+if [ ! -f "$1" ] || [ ! -f "$2" ]; then
+	echo "Need two file names"
+	exit 9
+fi
+
+RESULT1=`echo "$1" | sed 's0.*/00'`
+RESULT2=`echo "$2" | sed 's0.*/00'`
+RESULT=`pwd`/${RESULT1}-${RESULT2}.diff
+
+mkdir $WORK || ( echo "Couldn't create $WORK" && exit 8 )
+touch "$RESULT" || ( echo "Couldn't create output: $RESULT" && exit 8 )
+
+cp $1 $WORK/old.tgz
+cp $2 $WORK/new.tgz
+
+cd $WORK || exit 8
+
+tar xzf old.tgz
+tar xzf new.tgz
+
+rm old.tgz new.tgz
+
+diff -ruN * >"$RESULT"
+echo Wrote result to $RESULT
+
+cd ..
+rm -r $WORK

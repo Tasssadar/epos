@@ -1,0 +1,34 @@
+
+The seven files:
+	lkubec.dat	lvichova.dat
+	mkubec.vq	mvichova.vq
+	mkubec.vqc	mvichova.vqc
+	kubec.snl
+
+
+have been created by Ellen Vichova partly based on joint work
+with Miroslav Ptacek and modified by Petr Horak.
+
+All of these files are
+
+(c) 1990-93, 2000, 2003 Institute of Radio Engineering and Electronics of the Czech Academy of Sciences, Prague.
+
+All files in this directory as originally distributed
+(the aforementioned, this README-vq file and traditional.dpt)
+are a component of Epos and distributed under the
+GNU General Public License.  Consequently, the package
+can be redistributed and/or modified under the terms of the GNU
+General Public License as published by the Free Software Foundation;
+either version 2 of the License, or (at your option) any later version.
+
+This package is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License in doc/COPYING for more details.
+
+It is customary to install other LPC encoded voice inventories
+into this directory.  See their respective README files
+for their licensing conditions.
+
+In case of additional related questions you can write to
+Petr Horak <horak@ure.cas.cz>.

@@ -1,0 +1,198 @@
+#
+#	(c) Jirka Hanika <geo@cuni.cz>
+#	(also thanks to Martin Petriska who wrote the previous version of
+#	the Slovak transcription)
+
+$lower_case = aáäbcèdïeéìfghiíjklµåmnòoóôpqrøàs¹t»uúùvwxyız¾
+$upper_case = AÁÄBCÈDÏEÉÌFGHIÍJKL¥ÅMNÒOÓÔPQRØÀS©T«UÚÙVWXYİZ®
+$letter     = ${lower_case}${upper_case}
+
+$labial    = pbmvw
+$voiced    = bdïgvz¾Z®h
+$voiceless = pt»kfs¹cèx
+$VOICELESS = PT«KFS©CÈX
+$nasal     = mnòN
+$sonant    = jlårà$nasal
+$SONANT    = JLÅRÀMNÒG	; do not use after nk-> Nk
+$nonsonant = $voiced$voiceless
+$consonant = $nonsonant$sonant
+$diphthong  = âìùô
+$vowel     = aeiouyáéíóúıä$diphthong
+$VOWEL     = AEIOUYÁÉÍÓÚİÄ
+$sonority  = 0<'$nonsonant<$nasal<l<ràåj<$vowel
+
+$everywhere = !_!
+
+inside .  sent
+{
+	regex /([0123456789])\$/\1\Z/	word
+}
+regex  /(\Z)\\.([${lower_case}])/\1\2/	text
+regex  /\Z(\\.)([${upper_case}])/\1\2/	text
+
+regex    /\\((.\{1,12\})\\)/v~zátvorke~\1/				colon
+regex    /"(.\{1,12\})"/v~uvodzovkách~\1/				colon
+
+#  \d u¾ vydìlil parser, provizornì jako znak slovní úrovnì.  Úseky mezi
+#  vıskyty tohoto znaku (napø. teèka v URL) se hláskují, pokud neobsahují
+#  samohlásku nebo slabikotvornou souhlásku.  Tato pravidla se mohou chovat
+#  nerozumnì v kombinaci s velkımi písmeny.
+
+inside \d  word
+{
+	regress 0>\d(!_0)
+}
+regress \d>\ (!_!)		word	word
+
+if	roman
+{
+	@include  "roman.rul"
+}
+ 
+regex    /^([vVsSzZkK][~\ ]\{0,2\})\$/\W\1/
+regress  lr>\X\Y(0_!)
+near  *!\Wlr$vowel$VOWEL	word	phone
+{
+	regress ${lower_case}>${upper_case}(!_!) word
+	subst spellurl.dic			 word
+}
+regress  \W>0(!_!)
+regress  \X\Y>lr(0_!)
+
+regress	 ${lower_case}>${upper_case}(0_!${lower_case})			colon
+regress  ${upper_case}>${lower_case}(!$letter_${lower_case})		word
+regress  ${upper_case}>${lower_case}(0_${lower_case})			colon
+if	spellout
+{
+	regex	/^([^\Y\ ~]*)(.\?)\$/\1\Y\1\2/	word
+	progress ${lower_case}>${upper_case}(\Y${upper_case}_!)
+	regex	/\Y/./		text
+}
+subst	 spellout.dic							colon
+regress  ${upper_case}>${lower_case}($everywhere)			colon
+
+@include "numerals.rul"
+
+subst main.dic		; exceptions
+
+if  !aecg
+{
+	progress ä>e(!_!)
+}
+
+# Czech graphemes ì,ø,ù to be eliminated
+progress  ù>ú($everywhere)
+progress  ø>r($everywhere)
+progress  0>i(!dtn_ì)
+progress  ì>e($everywhere)
+
+# Latin graphemes x,q,w to be eliminated
+progress  0>s(x_!)
+progress  u0>0v(q_!)
+regress   xq>k($everywhere)
+progress  w>v(0_!)
+regress   v>w($vowel_0$nonsonant)
+
+progress ä>e(!$labial_!)
+
+regress   h>x(c_!)                ; ch > x
+regress   z¾>Z®(d_!)              ; dz,d¾ > Z,®
+progress  cd>0(!_xZ®)
+
+# Questions classified as yes/no or wh-questions
+
+progress  :>.($everywhere)	text	sent
+subst     wh.dic
+raise     Q:_			colon	phone
+progress  Q>_(!0_!)		sent	colon	;  first clause only
+raise     Q:?			sent	colon
+progress  Q>0($everywhere)			;  cleanup
+progress  Q>_($everywhere)	sent	colon
+progress  Q>:($everywhere)	text	sent
+
+# subst     syll.dic		;this is done for Czech, but rather not for Slovak
+
+if glottal_stop
+{
+	regress   0>'(0_$vowel)		colon
+}
+
+with "mòa ma mne mi mne mnou nás nám nami vás vám vami\
+	jeho neho mu nemu òom ním nich nimi òou nej òu jeho jemu jej"	word
+{
+	regress 0>Q(0_!)
+	regress \ ~_>Q(!_!)  word  word
+}
+with "so ku"   word
+{
+	regress \ ~_>P(!_!)  word  word
+}
+regress P>\ (!_Q)	colon	word
+inside P word
+{
+	regress $voiceless>$voiced(!_!)
+}
+with	preps.dic		word	word
+{
+	regress   _\ ~>P(!_!)	word   word
+}
+regress	P>\ (!_P)	colon  word	; consecutive prepositions? nope
+regress  _\ ~>F(!_0)		colon	word
+regress P>\ (!_Q)	colon	word
+inside	 P			word
+{
+	prep	preps.dic	word
+}
+progress  P>\ ($everywhere)	word	word
+
+
+subst     "^ná¹mu\$,ná¾mu    ^vá¹mu\$,vá¾mu    me\$,Me"	; may merge with main.dic
+regress   Q>0($voiced_!)	colon
+regress   $voiced>$voiceless(!_$voiceless&0')
+regress   $voiceless>$VOICELESS(!_0M)	syll
+regress   M>m(!_!)
+regress   $voiceless>$voiced(!_$voiced!v)
+regress   $VOICELESS>$voiced(!_$voiced$sonant$vowel)       colon
+regress   $voiceless>$voiced(!_$voiced!v)
+regress   $VOICELESS>$voiceless(!_!)
+regress   Q>0(!_!)
+regress   QP>\ (!_!)	word	word
+
+subst     hard.dic
+regress   dtnl>ï»òµ(!_iíe)
+regress   Eyı>eií(!_!)
+
+regress   $sonant>$SONANT(0_!)
+syll      $sonority	syll
+regress   $SONANT>$sonant(!_!)
+
+prep      nonsyl.dic	syll
+
+if  reduce_groups		; (c) Martin Petriska
+{
+	regress t>0(s_s)                 ;mestsky -> mesky
+	regress s>0(s_!)
+
+	regress s>q(Zdt_k)                  ; Zsk,tsk,dsk -> ck 	
+	progress Zdt>0(!_q)                 ; § 246
+	regress q>c($everywhere)
+
+	regress s>q(»tïd_t)		   ; »st,ïst,dst,tst-> ct
+	progress »tïd>0(!_q)
+	regress q>c($everywhere)
+ 
+	regress »>0(!_ï)		  ; »ï->ï devä»desiat
+}
+
+progress  n>N(!_kg)
+
+if  diphthongs
+{
+	regress  aeu>âìù(i_!)
+	regress  i>0(!_âìù)
+}
+if !diphthongs
+{
+	regress  0>u(!_ô)
+	regress  ô>o(!_!)
+}

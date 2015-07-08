@@ -1,0 +1,168 @@
+<sect> Logging
+<p>
+
+A very short section which just doesn't seem to belong anywhere else.
+
+<sect1> Syslog
+<p>
+
+Epos supports error logging via syslog (on systems where syslogd
+is running).  At the moment, only (the most of) TTSCP completion codes
+together with the associated messages can be logged; this includes
+all abnormal server termination states (except for a plain old fatal
+signal).  If syslog should be available (the <tt>syslog.h</tt> header
+file is present), but isn't, the error messages are logged directly
+to the system console.  If the syslog facility is being missed at
+compilation time, Epos opens a file called <tt>epos.err</tt> in the
+current directory whatever it may be and writes some debugging
+information there instead.
+
+The syslog message levels are set according to the <ref id="syslogs"
+name="syslog message levels"> table.  In all cases, Epos messages
+are logged with the <tt/daemon/ facility.
+
+
+<table loc="h">
+<tabular ca="|l|l|">
+<hline>
+<label id="syslogs">
+level		|  used for @
+<hline>
+<tt>debug</tt>	|  trivial success TTSCP codes @
+<tt>info</tt>	|  silly errors and other messages @
+<tt>notice</tt>	|  shutting down as requested @
+<tt>warning</tt>|  security or network error @
+<tt>err</tt>	|  internal error @
+<tt>crit</tt>	|  abnormal termination @
+<hline>
+</tabular>
+<caption>
+	syslog message levels
+</caption>
+</table>
+
+See also the <ref id="authpriv-option" name="<tt>authpriv</tt> option">
+which may change this behavior for possibly security-related errors,
+but not network errors.
+
+<sect1> Home-Made Logging
+<p>
+
+Any debugging output together with error messages etc. is also often logged
+to <tt>/var/log/epos</tt> as specified with the
+<ref id="daemon-log-option" name="<tt>daemon_log</tt> option">.
+
+The agent profile which shows how much time does Epos spend with
+individual agents (which gives an insight into which processing
+phases are time consuming) can be turned on with the
+<ref id="profile-option" name="<tt>profile</tt> option">.
+
+<sect> Security
+<p>
+
+This section just summarizes security features of Epos documented elsewhere
+to assist the administrator in setting up a multi-user installation of Epos,
+especially in a UNIX-like environment.
+
+Epos can be compiled in two ways; either as a simple monolithic binary
+or as a Text-to-Speech Control Protocol server.  For technical reasons
+(especially the latency), it is strongly recommended to choose the latter
+method for most situations.
+
+<sect1> TTSCP-related Issues
+
+<sect2> Authentication
+<p>
+
+TTSCP as such includes support for user name and plain text password
+based authentication.  At the moment, Epos doesn't implement any name
+space for this authentication mechanism, except for a randomly-generated
+server password.  Thus, all connections are either completely anonymous,
+or authenticated at the "server" level (which can still be restricted
+from setting or reading specific options.)
+
+In the default configuration, the server password is stored
+in <tt>/var/run/epos.pwd</tt>.  Any process
+with rights sufficient to read this file is able to authenticate as the
+server over TTSCP.
+For debugging purposes, it is also possible to force Epos to accept
+an additional server password with the <tt/debug_password/ option.
+
+<sect2> TTSCP Connection Handles
+<p>
+
+In TTSCP, a control connection can issue commands that affect any
+other connection (e.g. interrupt a command in progress).  To prevent
+malicious use, the handle necessary to refer to a connection is
+only available to the connection originator, and is generated at random.
+Consequently, privacy in TTSCP relies on the properties of the underlying
+network connection and on the length of the data connection handle.
+Each byte of handle length carries a perplexity of six bits; reasonable
+handle lengths (as controlled with the <tt/handle_size/ option therefore
+fall within the range <tt/10/ to <tt/200/.  Be sure to adjust
+<tt/max_line_len/ as well if using extremely long connection handles.
+
+<sect2> <tt>restr.ini</tt> File
+<p>
+
+Many TTSCP options are rarely set over TTSCP, and some of them could be
+used for malicious ends.  In these cases, the administrator may restrict
+their use in the <tt/restr.ini/ as described in <ref id="restricted-options"
+name="the respective section">.  Note especially that unlisted options can
+be set freely, and the default <tt/restr.ini/ file as distributed with Epos
+may occasionally omit a slightly dangerous option.  Therefore,
+you may want to grep out a list of <em/all/ options and to leave out
+only options you're going to treat as necessary for users and harmless
+for the server.  On the other hand, almost no options affect the security
+directly, because they're only set within the context of the current
+TTSCP connection, and the few exceptions are unlikely to have been overlooked.
+
+<sect2> Access to the Local Sound Card
+<p>
+
+At the moment, any TTSCP client is capable of writing arbitrary waveform data
+to the local soundcard.  If you consider this a security risk, disable
+the <tt/&num;localsound/ output module by turning the <tt/localsound/ option off.
+
+The interfaces supported are Open Sound System and Microsoft Multimedia
+System.
+
+<sect2> Access to the Local File System
+<p>
+
+TTSCP in theory offers file system based input and output modules.  For example,
+that allows the client to write some intermittent product to a server-side file
+and then the client may decide to use it repeatedly as an input to multiple streams.
+However, the name space for the files doesn't have to correspond to the file system
+root of the TTSCP server.  With Epos, you can configure the location of the
+TTSCP name space using the <ref id="pseudorootdir-option" name="--pseudo_root_dir option">.
+Furthermore, writing to it is disabled by default; this restriction can be overridden
+by setting the --<tt/writefs/ option.
+
+<sect1> Privileged Executables
+<p>
+
+It is not recommended to run Epos as a setuid or setgid binary, not because
+of a known security weakness, but because of the possibility of yet unknown
+bugs.  If necessary, Epos should run setgid to a group with minimal privileges.
+
+Note also that the <tt/base_dir/ parameter can be given to Epos on the
+command-line, thus by-passing the restrictions specified in the <tt/restr.ini/
+file.  This issue may be solved in later versions of Epos; at the moment
+you have to adjust the source manually.
+
+Instead of a privileged executable, run Epos with the desired privileges
+at system start-up and use a TTSCP client to control it from then on.
+
+<sect1> <tt>local_only</tt> Option
+<p>
+
+By default, the TTSCP server only binds to the loopback interface.
+That way, only local users can see and use Epos.  Turn off the
+<tt/local_only/ option to allow remote users to communicate
+with Epos on your machine.
+
+Theoretically, this security measure should not be needed, but it is very simple
+and thus likely to reduce the risk caused by bugs hidden in more complex corners of the
+Epos TTSCP implementation.
+

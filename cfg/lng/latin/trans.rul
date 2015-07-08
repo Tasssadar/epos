@@ -1,0 +1,243 @@
+#
+#	(c) 2005 Jirka Hanika <geo@cuni.cz>
+#
+
+$voiced    = bdgvzh
+$voiceless = ptkfsx
+$aspirated = PTK
+$nasal     = mnòN
+$sonant    = jlr$nasal
+$short     = aeëiouy
+$long      = áéëíóúı
+#$diphthong  = AE
+$vowel     = $short$long
+#$VOWEL     = AEËIOUYÁÉËÍÓÚİ
+$consonant = $voiced$voiceless$sonant
+$everywhere= !_!
+$numbers   = 1234567890
+$sonority  = 0'<$voiceless$voiced<$nasal$aspirated<lrj<$vowel
+
+
+$lower_case = aáäbcèdïeéìëfghiíjklmnòoóöpqrøs¹t»uúùüvwxyız¾
+$upper_case = AÁÄBCÈDÏEÉÌËFGHIÍJKLMNÒOÓÖPQRØS©T«UÚÙÜVWXYİZ®
+$letter = ${lower_case}${upper_case}
+
+if	roman
+{
+	@include  "../slovak/roman.rul"
+}
+ 
+regress  ${upper_case}>${lower_case}($everywhere)		colon
+near 0123456789^\$+\d\-\m=/\@()[]{}&*%_'"`\\<>\#			sent phone
+{
+	@include "numerals.rul"
+}
+
+
+
+subst	   quantitas.dic
+regress  ${upper_case}>${lower_case}($everywhere)		colon
+
+near   xq		word
+{
+	if  !classical
+	{
+		if  ecclesiastical
+		{
+			regress  c>C(x_eiéíyë)
+			regress  x>0(!_C)
+			regress  C>c(!_!)
+		}
+		if  !ecclesiastical
+		{
+			if  nordic
+				regress  c>0(!_eiéíë)
+			if  !nordic
+			{
+				regress  c>C(x_eiéíyë)
+				regress  x>k(!_C)
+				regress  C>c(!_!)
+			}
+		}
+	}
+	progress  0>s(x_!)
+	progress  u>0(q_!)              ; Rozlo¾ení x,q na ks, kv - dokonci se po sylabifikaci
+	regress   x>k($everywhere)
+}
+
+# Následující pravidla jednak zmìní vìty vydìlené dvojteèkou
+#   na vìty vydìlené teèkou (to je spí¹e ¹patnì ne¾ dobøe),
+#   dále pak oznaèí dvojteèkou (místo otazníku) ty vìty, které
+#   obsahovaly ve své první klausi nìkteré ze slov uvedenıch
+#   ve slovníku wh.dic, nemìly tuto klausi zvlá¹» vydìlenou
+#   ¾ádnou interpunkcí, a byly samy vydìleny otazníkem.
+#
+# Fonetik vidí, ¾e jsem právì "definoval" doplòovací otázky.
+
+ near      ?:				text	sent
+ {
+	 progress  :>.($everywhere)	text	sent
+	 subst     wh.dic				; Doplòovací otázky
+	 raise     Q:_,			colon	phone
+	 progress  Q>_(!0_!)		sent	colon	;  jen v první klausi
+	 raise     Q:?			sent	colon
+	 progress  Q>0($everywhere)			;  úklid v¹ech úrovní
+	 progress  Q>_($everywhere)	sent	colon
+	 progress  Q>:($everywhere)	text	sent
+  }
+
+ if  classical
+ {
+	regress  e>i(ao_!)
+ }
+ regress   e>É(ao_!)
+ regress   ao>0(!_É)
+ regress   Éë>ée($everywhere)
+
+ if     handle_vocalic_groups
+ {
+	regress   iu>jv(0$vowel_$vowel)
+	regress   i>j($vowel!ií_0)   syll
+	subst     syll.dic		; Rozsadit vokály
+	regress   0>'(0_$vowel)	; Rázy
+ }
+
+
+
+
+ if  ecclesiastical
+ {
+	regress   0>d(!d_z)
+ }
+
+ if  classical
+ {
+	regress   c>k($everywhere)
+	regress   g>G($everywhere)
+ }
+ if  !classical
+ {
+	regress   c>k(!_!eiéíy)
+	regress   g>G(!_!eiéíyn)
+
+	regress   p>F(!_h)
+	regress   h>0(F_!)
+
+	regress   h>0(tk_!)
+ }
+ if   ecclesiastical
+ {
+	regress   c>è($everywhere)
+	regress   è>¹(s_!)
+	progress  s>0(!_¹)
+	progress  k>è(!_è)
+	regress   g>ò(!_n)
+	regress   n>0(ò_!)
+	regress   g>®($everywhere)
+ }
+ if   nordic
+ {
+	regress   c>s($everywhere)
+ }
+ regress   FG>fg($everywhere)
+
+
+ regress   ií>IÍ(t_${vowel})
+ regress   t>c(${vowel}_IÍ)
+ regress   IÍ>ií($everywhere)
+
+ regress   $voiced>${voiceless}(!_$voiceless&0')       	; Asimilace znìlosti
+ regress   ptk>bdg(!_$voiced!hv)       colon
+
+ progress  y>i($everywhere)
+
+ progress  n>N(!_kg)
+ progress  g>0(N_!)
+ progress  ptk>PTK(!_h)
+ progress  h>0(PTKr_!)
+ if  form_syllables
+ {
+	syll      $sonority	syll	; Rozklad_na_slabiky
+ }
+ progress 0>h(PTK_!)
+ progress PTK>ptk(!_!)
+ progress 0>g(N_!k)
+ progress 0>v(q_!)
+
+ if  !classical
+ {
+	 regress   b>0(!_b)	syll	; pochybnı heuristickı odstaveèek
+	 regress   n>0(!_nò)	syll	; namíøenı proti geminátám
+	 regress   s>0(!_s)	syll
+	 regress   t>0(!_t)	syll
+	 regress   f>0(!_f)	syll
+ }
+
+
+ if  diphthongs
+ {
+	progress  ae>AE(!_u)	syll	; Dvojhlásky
+	regress   u>0(AE_!)	syll
+	subst     "eum\$ e|um"
+ }
+
+ if  !voiced_affrs
+ {
+	regress   Z®>DÏ(!_$vowel)	; toto by mìlo pøijít do inventáøe (traditnl.dph);
+	regress   0>d(!_DÏ)		; rozkládá se zde dz, d¾ (representované Z,®)
+	regress   DÏ>z¾(!_!)		; na d-z, d-¾, pokud následuje vokál.
+ }
+
+ if  !ecclesiastical
+ {
+	regress   g>N(!0_n)
+ }
+
+ if  classical
+ {
+	regress   h>0(i_i)
+	regress   p>f(!_f)
+	regress   b>m(!_m)
+	regress   p>c(!_c)
+	regress   b>g(!_g)
+	near      v    				syll
+	{
+		regress   0>'(0_uv)		syll
+		regress   v>u($everywhere)	phone   phone
+	        contour   t/-60    		phone   phone
+		contour   i/+50			phone   phone
+	}
+	regress  i>j(aeo_!)
+ }
+
+ if  !classical
+ {
+	regress   s>z(lr$vowel_$vowel)
+ }
+
+ regress   l>L(!_lL)
+ regress   lL>0(L_!)
+ near  L		phone
+	contour t/+60	phone	phone
+ regress   L>l(!_!)
+ regress   s>S(!_sS)
+ regress   sS>0(S_!)
+ near  S		phone
+	contour t/+40	phone	phone
+ regress   S>s(!_!)
+ regress   g>G(!_gG)
+ regress   gG>0(G_!)
+ near  G		phone
+	contour t/+20	phone	phone
+ regress   G>g(!_!)
+ regress   b>B(!_bB)
+ regress   bB>0(B_!)
+ near  B	phone
+	contour t/+20	phone	phone
+ regress   B>b(!_!)
+ regress   p>P(!_pP)
+ regress   pP>0(P_!)
+ near  P	phone
+	contour t/+20	phone	phone
+ regress   P>p(!_!)
+

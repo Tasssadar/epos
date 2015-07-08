@@ -1,0 +1,32 @@
+
+[
+	NOTE.  This directory is obsolete enough to be incomprehensible.
+	Do not use except when trying to compile a command-line version
+	of Epos for paleocomputers.  Be creative if you do.  Good Luck.
+]
+
+
+
+	Compilation notes.
+
+Epos may happen to compile under various versions of Watcom, Microsoft and Borland
+compilers, as well as gcc and egcs ports. If you ever need to use
+another C++ compiler, you should know that 
+
+- most of the .cc files as listed in SRC_BASE in Makefile.am
+  (possibly renamed to .cpp) can be compiled separately
+  using Borland makefiles (epos.bpr and say.bpr): "make -fepos.bpr"
+  but you may want to compile them together, using any compiler
+  and epos.cpp in this directory
+- the compiler should support templates, exception handling etc.
+- int type size must be at least 32 bits
+- warnings can usually be ignored, the compilers mentioned just happen
+  to have different aesthetic feelings than we have 
+- I'd guess GNU C++ (g++) might be the best choice, if you have access to it.
+- as my development environment is linux/gcc, you may have some compilation 
+  problems under DOS, both great and small. Don't think I cross-test every
+  patch I hack in.
+
+I will appreciate any reports of successful or unsuccessful compilation
+attempts under non-UNIX operating systems.
+

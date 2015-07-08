@@ -1,0 +1,86 @@
+
+This is Epos, a freely distributable language independent Text-to-Speech
+system. See doc/COPYING for distribution conditions.
+
+------------------------------------------------------------------------
+
+Compiling and installation on a UNIX machine:
+
+ 1. ./configure
+ 2. make
+ 3. make install   (with sufficient rights to install cfg files under /usr/local/share/epos)
+ 4. install speech segment inventories (see cfg/inv/README for an explanation;
+	untar them starting from /usr/local/share/epos/inv)
+
+Running on a UNIX machine:
+ eposd       starts a speech daemon  
+ say-epos    controls this daemon, e.g. "say-epos 'Some text'" means "tell eposd to
+	     say 'some text'".
+
+-------------------------------------------------------------------------
+
+Compiling with Visual C++ and installation on a Windows NT (Windows 2000 etc.) machine:
+
+ 1. cd arch\win
+ 2. copy cpconv2.exe into arch\win if you require the conversion of
+	configuration files into code page 1250 (this is optional)
+ 3. .\configure.bat
+ 4. cd ..\..\src
+ 5. run VC and open the workspace file epos.dsw
+ 6. build all the projects - at least instserv, eposd and say-epos
+ 7. install speech segment inventories (see cfg/inv/README) if required
+	(copy them to the cfg\\inv directory and untar them there)
+ 8. run instserv.exe (it should compile into the same directory as eposd.exe,
+    else it won't find eposd.exe) with sufficient rights to install Epos
+    as a Text-to-Speech service and to write a pointer to its configuration
+    to the registry
+ 
+Then try to run "say-epos.exe some text" with sufficient privileges to hear Epos speak.
+
+----------------------------------------------------------------
+
+The default configuration speaks Czech using the local sound card and
+the public TTSCP server at epos.ure.cas.cz. If you don't have a sound
+card, you might wish to try "say-epos -w 'Some text'" to create said.wav
+which is an MS Windows-style .wav file. If you are not connected to
+the Internet, or epos.ure.cas.cz is unreachable or misconfigured 
+Epos will revert to a low quality voice distributed with Epos for this
+purpose.  (In some versions of Epos the default voice is supposed
+to be installed locally.  Be creative.  Use "say-epos -l" to find out
+the order of the voices.  Use "say-epos --voice xxxxxxx 'Some text'" to
+use a specific voice.)
+
+System requirements:
+
+ Any decent C++ compiler, for example gcc 2.8 or later.
+	Good choices also include MS Visual C++, Watcom C++; otherwise
+	"decent" means "recent".
+ (If using the GNU assembler, gas version 2.9 or newer is recommended.)
+
+More info:
+
+ 1. read doc/*.sgml (or, in the compiled form: epos.dvi or epos.html or epos.txt)
+ 2. there are other relevant files under "doc"
+ 3. browse http://epos.ure.cas.cz/ (mostly identical to (1))
+ 4. have a look at the files under cfg (or /usr/local/share/epos)
+ 5. read the source under src
+(The last two steps are optional.)
+
+Getting help:
+
+ 0. The order of the following steps is important.
+ 1. Download a recent version.
+ 2. Get more info as outlined above.
+ 3. Mail to epos@speech.cz
+    Mention the version you're running or trying to run
+    (to be found in common.h or by "eposd -v") and describe your
+    problems. If your mail bounces, you might try geo@cuni.cz instead.
+
+Bug reports:
+
+	If you think you found a technical bug, you can send it
+	directly to epos-dev@speech.cz.  This is a developer
+	list.  The list language is English. Consider subscribing
+	to the list first so that you miss no answers if somebody
+	forgets to CC you.  Again, be sure to mention the version
+	you are trying to run.

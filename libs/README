@@ -1,0 +1,9 @@
+The code in libs is external to Epos and has only been
+provided as a build convenience.
+
+Under typical circumstances, none of this software is used.
+
+The portaudio library is only used if explicitly enabled.
+The regular expression library is only used if the operating
+system's libraries do not provide this functionality.
+

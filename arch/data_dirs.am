@@ -1,0 +1,3 @@
+DATA_DIRS = dos				\
+unix unix/upload			\
+win win/service win-ce

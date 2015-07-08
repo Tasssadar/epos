@@ -1,0 +1,26 @@
+We are considering including PortAudio 18 or pre-19 at this place
+and building it conditionally.  We cannot use a system-wide
+pre-installed PortAudio instead as it never includes PABLIO.
+
+If you want to put portaudio here and reconfigure with
+--enable-portaudio=yes
+please don't forget to distclean the whole tree and then
+to disable the output of libs/portaudio/Makefile in
+Epos configure.ac (so that Epos doesn't feel responsible
+for this directory anymore).
+
+This situation is temporary.  (Or it was in April 2005.)
+
+Instructions
+============
+
+ 1. Put the contents of the downloaded portaudio tarball
+	in this directory.
+ 2. cd libs/portaudio
+ 3. build portaudio, you can use these commands:
+	./configure
+	make
+ 4. build pablio, you can use these commands
+	gcc -c -g -O2 -Ipa_common pablio/pablio.c -o pablio/pablio.o
+	ar ruv lib/libpablio.a pablio/pablio.o
+	ranlib lib/libpablio.a

@@ -1,0 +1,460 @@
+
+
+<sect> Source Code Documentation
+<p>
+
+This section is of little use for anyone except for programmers willing to contribute
+to the development of Epos or going to modify its source code. It is also not
+trying to become a beginner's guide to Epos. Anyway, if you are personally missing
+something here or elsewhere, tell me and I may add it; that will become almost the only
+source of progress in this section of documentation. The section may also slowly
+become outdated due to lack of interest, except for the subsection on portability.
+
+<sect1> Design Goals
+<p>
+
+Overall coding priorities, approximately in order of decreasing precedence:
+<itemize>
+	<item> language independence and generality
+	<item> no undocumented or implicit "features" (except for error handling)
+	<item> portability
+	<item> maintainability, clean decomposition
+	<item> clean (intuitive) protocols and programming interfaces
+	<item> scalability
+	<item> intuitive configuration
+	<item> fault tolerance
+	<item> simple algorithms
+	<item> code readability
+	<item> speed
+	<item> space
+	<item> possible parallelizability
+</itemize>
+
+<sect1> Isolated Classes
+<p>
+
+<tt/class parser, unit, rules, text/ and maybe a few others are isolated classes
+that take no advantage from inheritance. The reason for the class-oriented design
+is just a matter of code readability and decomposition in this case.
+
+<sect2> Class <tt>simpleparser</tt>
+<p>
+
+This class takes some input (such as a plain ASCII or STML text) and then can be
+used in conjunction with the <tt/class unit/ constructor to build the
+<ref id="tsr" name="text structure representation">. Its purpose is to
+identify the Latin text tokens (usually ASCII characters, but some traditional
+tokens like "..." would be difficult to identify later, as well as numerous other
+context dependent uses of "."). The parser also identifies the level of description
+which corresponds to the token and this is the information needed by the <tt/class
+unit/ constructor to correctly build the <ref id="tsr" name="TSR">. In this process,
+the parser skips over any empty units, that is, units that contain no phones
+(simple letters) at all.
+
+Note that it is unnecessary and counterproductive to distinguish between homographic
+tokens used at the same level of description here; such intelligence can be handled
+more flexibly by the language dependent rules. In fact, they tend to be usually
+language dependent. The parser only avoids losing information (through empty unit
+deletion) by the minimum necessary tokenization.
+
+The STML parser is still unimplemented.
+
+<sect2> Class <tt>unit</tt>
+<p>
+
+This class is the fundamental element of the <ref id="tsr"
+name="text structure representation">. Its methods are listed in
+<tt/unit.h/.  Every object of this type represents a single
+text unit.  Every unit includes pointers to its immediate
+container, and to its contents. The contents are organized in a
+bidirectional linked list; pointers to the head and tail units
+of this lists are stored in the unit. These links, i.e. <tt/prev/
+and <tt/next/, also serve to locate the neighboring units; they may be
+<tt/NULL/, indicating that this is the first/last unit in the
+immediate container.  For most uses, these pointers are not suitable
+to be used directly; the <tt/Prev/ and <tt/Next/ methods find the
+neighbor, even if a higher level boundary lies in between. It is also
+possible to mark a unit as a <tt/scope/ one. In this case, the <tt/Next/
+and <tt/Prev/ methods will be unable to cross its boundary from inside
+out (they will return <tt/NULL/ if this is attempted).  If you need to
+modify the TSR directly, you will benefit from calling <tt/unit::sanity/
+occasionally. This method checks the TSR structure near the unit which has
+called it and will report a severe error, if an invariant is violated,
+thus saving you from misguided error messages or crashes later.
+
+To extract the prosodic information from a TSR, call the <tt/effective/
+method.  It will combine the prosodic adjustments present at all the levels
+of description above the current unit.
+
+<sect2> Class <tt>text</tt>
+<p>
+
+This class represents a logical line-oriented text file. It handles things
+like the <ref id="include-directive" name="&commat;include directive">,
+<ref id="escaping" name ="backslash-escaped special characters">,
+initial whitespace and comment stripping. It is used for <ref id="rules"
+name="rule files">,  <ref id="cfg-files" name="configuration files">,
+and also for the <ref id="dictionary" name="dictionaries">.
+
+<sect2> Class <tt>file</tt>
+<p>
+
+This class represents a physical data file.  Its main purpose is to cache and
+share files repeatedly needed by Epos.  The <tt/claim/ function (to be found in
+<tt/interf.cc/) should be used for opening the file (or only sharing an existing
+copy if the file is already open) and reading the data out of the file. The
+<tt/unclaim/ function is called separately for every <tt/claim/ call whenever
+the file is no more needed.
+
+Any code which uses this class should never extract the data member out of it and
+use it independently, even if the class itself remains claimed. This is because
+if the content of the file has changed, the data in memory will be reallocated and
+re-read upon the next call to <tt/claim/ or possibly even sooner. This may cause
+invalidation of the original <tt/data/ member at any point of a control switch
+to another Epos agent.  It is possible to call <tt/reclaim/ at any time to force
+re-reading any file if its time stamp has changed.
+
+<sect2> Class <tt>hash</tt>
+<p>
+
+<tt/class hash/ is derived from <tt/class hash&lowbar;table&lt;char,char&gt;/.
+The <tt/hash&lowbar;table/ template is a generic hash table, keys and associated
+data items being its class parameters. This implementation uses balanced (AVL)
+trees to resolve collisions and is able to adjust (rehash) itself 
+when it gets too full or too sparse. It is a very robust and fast
+implementation and it is independent of the rest of Epos, so you
+may use it in other projects if you want to (subject to GPL).
+If you want to have the hash table keep a copy of its contents,
+the key and/or data may only be of a fixed size type, or a C-style
+string. Alternatively, the hash table will only store pointers
+to these items. These approaches can be mixed in any reasonable
+sense of "mixing".
+
+The hash tables are used frequently in Epos in various type combinations
+(see <tt/hash.cc/ for a list. They're also used for parsing the 
+<ref id="dictionary" name="dictionary files">.
+
+<sect2> Class <tt>rules</tt>
+<p>
+
+Note the difference between <tt/class rules/ and <tt/class rule/.
+Every set of rules in Epos (there is one per language) is a <tt/class
+rules/, which contains a single <tt/r_block/, which in turn
+contains the individual rules.
+The <tt/class rules/ serves as the only communication interface
+between the <tt/rule/ hierarchy and the rest of Epos, but there
+is no inheritance relation between them.
+
+
+
+<sect1> Class Hierarchies
+
+<sect2> Class <tt>rule</tt>
+<p>
+
+Each <tt/rule/ object represents a rule to be applied to 
+a structure of units. The class hierarchy:
+
+rule
+<itemize>
+	<item> r_regress
+	<itemize>
+		<item> r_progress
+	</itemize>
+	<item> r_raise
+	<item> r_syll
+	<item> r_contour
+	<item> r_smooth
+	<item> r_regex
+	<item> r_debug
+	<item> hashing_rule
+	<itemize>
+		<item> r_subst
+		<itemize>
+			<item> r_prep
+			<item> r_postp
+		</itemize>
+		<item> r_diph
+		<item> r_prosody
+	</itemize>
+	<item> cond_rule
+	<itemize>
+		<item> r_inside
+		<item> r_if
+		<item> r_with
+	</itemize>
+	<item> block_rule
+	<itemize>
+		<item> r_block
+		<item> r_choice
+		<item> r_switch
+	</itemize>
+</itemize>
+
+Classes not beginning in <tt/r_/ can be considered abstract.
+
+<sect2> Class <tt>agent</tt>
+<p>
+
+Epos can be configured to support multiple simultaneous TTSCP connections
+and except for bugs, no single unauthorized connection should be able to
+create a Denial of Service situation, such as long delays in processing
+other connections.  To achieve this, Epos uses a simple cooperative multitasking
+facility called <em/agents/. An agent (process) is an entity, which is responsible
+for carrying out some task, such as reading a few bytes from a file descriptor.
+At any moment (except for the startup and the very moments of a transfer of
+control), exactly one agent is active (Epos doesn't support SMP to avoid
+the unnecessary overhead and complexity in the typical case).  If an agent has to wait
+for some event before its job is finished, for example, when the sound card reaches
+full buffers or not enough data has arrived through a network connection, the agent
+calls the <tt/block/ method (reading) or <tt/push/ method (writing) with the offending
+file descriptor.
+It is also possible for an agent to wait until some other agent
+executes; see the <tt/block/ and <tt/push/ methods' implementation for an example.
+If an agents wants
+to have another agent running, it can call the <tt/schedule/ method to add it
+to the queue of runnable processes. The scheduled agents always acquire control
+through the <tt/run/ method; when this method returns, another agent is chosen.
+If there are no more runnable agents, Epos will wait until an agent becomes runnable
+through a status change of the file descriptor the agent is <tt/block/ing for.
+
+Most agents get their data input through the <tt/inb/ data member and place their output
+into the <tt/outb/ data member. Whenever the agent has completed a stand-alone chunk
+of output, the agent calls the <tt/pass/ method to pass it to its successor and
+to schedule it for processing. The output agent never calls <tt/pass/ (it has actually
+no successor and it is responsible for writing the data somewhere outside Epos),
+but it calls <tt/finis/ when the data has been successfully written.
+
+Most agents are organized into streams of interconnected agents. See the
+<ref id="strm-cmd" name="strm command"> for the semantics of that.
+Other agents are responsible for individual TTSCP connections, for accepting new
+connections and other tasks. A special agent is used for deleting other
+agents when they need to delete themselves.
+
+The <tt/chunk/ agent may perform utterance chunking, that is, splitting the
+text being processed at convenient points, such as after a period or at end
+of paragraph.  Such chunks travel through the rest of the stream independently
+and they are queued between consecutive agents if necessary.  Such a queue
+(if non-empty) is a linked list starting with <tt/pendin/ of the latter
+agent while the end is pointed to by <tt/pendout/ of the former agent.
+The <tt/pendcount/ member of the latter agent stores the current number
+of data chunks in the queue, which is used for sanity checking and
+flow control.
+
+The current agents are:
+
+agent
+<itemize>
+	<item> stream
+	<item> a&lowbar;accept
+	<item> a&lowbar;protocol
+	<itemize>
+		<item> a&lowbar;ttscp
+	</itemize>
+	<item> a&lowbar;disconnector
+	<item> a&lowbar;ascii
+	<item> a&lowbar;stml
+	<item> a&lowbar;rules
+	<item> a&lowbar;print
+	<item> a&lowbar;diphs
+	<item> a&lowbar;synth
+	<item> a&lowbar;io
+	<itemize>
+		<item> a&lowbar;input
+		<item> a&lowbar;output
+		<itemize>
+			<item> oa&lowbar;ascii
+			<item> oa&lowbar;stml
+			<item> oa&lowbar;diph
+			<item> oa&lowbar;wavefm
+		</itemize>
+	</itemize>
+</itemize>
+
+<sect1> Testing
+<p>
+
+The Epos package contains three TTSCP clients.  One of them is the standalone
+<tt/say-epos/ utility, which is provided as a good and simple example of a TTSCP
+client.  We suggest to use it as a starting point for developing specialized
+TTSCP clients, even though it is already somewhat crufty.
+
+The <tt/tcpsyn/ virtual synthesizer also embeds a TTSCP client; it is
+wise to check its proper functioning after making changes to the TTSCP
+server implementation.
+
+A standalone test suite is compiled under the name <tt/vrfy/.  It is currently
+only trying a few standard tricks to crash the server and is far from being
+a rigorous test suite.  However, it manages to catch much more programming
+errors than <tt/say-epos/ and we recommend to run it after making any changes to
+the source code of Epos.  This test suite assumes Epos has been configured
+correctly and is listening at the standard TTSCP port.  Don't be surprised
+if a bug found by <tt/vrfy/ turns out to be a false alarm because of a bug
+in <tt/vrfy/ itself.
+
+No part of the <tt/vrfy/ TTSCP client should be mimicked by other software
+or be used as a study material. This client tries to be as ugly as possible
+and to crash any crashable server.  Adding some ugly tests to this piece of
+code might raise the average code quality of Epos significantly.
+
+<sect1> Portability
+<p>
+
+Epos is written to be as portable as possible.  It is however also
+written with UNIX developer's tastes, and it is also partly true
+of this documentation.  The following should give you an approximate
+look at the degree of support for some most common operating systems.
+
+<p>
+
+<sect2> Linux
+<p>
+
+The primary development OS.  The most of the testing is done
+under Debian and Red Hat distributions.  Please report
+to us any compilation issues which may be distribution related,
+these will be the easiest ones to solve.
+
+<sect2> Other UNIX Clones
+<p>
+
+Epos is ported to other unices
+from time to time as well, but there may be minor incompatibilities
+in recent code.  In this documentation, references to UNIX should be
+read as "tested on Linux, implemented using POSIX compliant interfaces
+and expected to be easy to get working on any other UNIX clone".
+
+<p>
+
+Epos uses the <tt>autoconf</tt> package to avoid portability pitfalls
+within the UNIX world.  Features like <tt>syslog</tt> are welcomed
+and used, but only if the corresponding system header file is detected
+by <tt>autoconf</tt>.
+
+<p>
+
+For sound output, OSS is preferred (if detected); otherwise,
+the Portable Audio library conveniently provided with Epos is used.
+
+<sect2> QNX
+<p>
+
+On the QNX operating system, Epos can be controlled not only over
+a TCP-based TTSCP implementation, but also using a QNX specific
+interprocess communication interface.  See <tt>src/qnxipc.cc</tt>
+for details; be however aware that this code has never been completely
+debugged because of a drop in our motivation.  You could help debug
+this easily if you really need this and provide us with a QNX machine.
+
+<sect2> Windows NT, 2000, XP
+<p>
+
+See the <tt>arch/win</tt> directory for architectural differences from UNIX.
+Be aware of the following three differences of Epos's behavior
+on these operating systems:  the <tt/mmsystem/ (Microsoft Multimedia System)
+library is used instead of <tt>/dev/dsp</tt> (Open Sound System) for speech output;
+Epos compiles and runs as an NT service named <tt/ttscp/, instead of a UNIX-style
+daemon; you can use registry to locate the configuration files.
+
+<p>
+
+In order to make service installation and registry access available,
+it is necessary to build and run the <tt>instserv</tt> utility before
+running Epos.  That utility, if run with the letter <tt/u/ on its
+command line, can also uninstall the <tt/ttscp/ service, but it doesn't
+remove any registry values.
+
+<p>
+
+You should use the Visual C++ compiler for compiling Epos,  but you
+don't need it for running Epos.  The Borland C++ Builder and Watcom C++
+used to work a long time ago, too.  Ask us for help with these compilers
+if necessary.  Please refer to the <tt>WELCOME</tt> file on
+how to proceed step by step with Visual C++.
+
+<sect3> Advanced Notes for Windows NT
+<p>
+
+File input and output modules are not going to work
+with Windows sockets (whose incompatible implementation
+of the <tt/select/ call doesn't allow file decriptors at all).
+If you do enable the <tt/writefs/ option, Epos will crash
+after the first writing error such as disk full.
+Don't try to enable the <tt/readfs/ option.
+
+<sect2> Windows CE
+<p>
+
+The port was roughly done and found possible, but it is
+not maintained.  Ask us if you need it.  Files specific
+for this port can be currently found at
+<tt>arch/win-ce</tt>.
+
+<p>
+
+An experienced Windows user can get a good estimate of this port's
+behavior from reading the sections on other versions of Windows.
+The same holds for Windows XP embedded.
+
+<sect2> Windows 95, 98 etc.
+<p>
+
+We don't support these DOS successors very strongly now,
+but these ports used to work.  If you want to try out,
+you should probably comment out the <tt>HAVE_WINSVC_H</tt> line
+in <tt>src/config.h</tt> after running <tt>arch/win/configure.bat</tt>.
+This will force Epos to compile not as a Windows NT service, but
+as an ordinary UNIX-style daemon.  In fact, the way Epos is written,
+it will decide to run as a daemon if it can't connect to the service
+controller anyway.
+
+The same holds for MS DOS, but as MS DOS offers no sound playback interface,
+you'll have to comment out portions of source code here and there to make
+Epos e.g. produce wave files.  Good luck and don't even try to use 16-bit
+compilers, please.
+
+<sect2> Other OSes
+<p>
+
+Please contact the authors for advice with any OS significantly different from
+the UNIX and Windows families.  However, the approximate requirements are:
+
+<itemize>
+	<item> Architecture: 32bit (big endian is OK)
+	<item> Reliable C++ compiler (no libraries needed)
+	<item> Standard C library
+	<item> 8-bit ASCII based character set
+	<item> TCP/IP networking
+</itemize>
+
+Note that the architectural requirements are only a guideline and are enforced
+rather for lack of energy for debugging Epos on every perverse 36-bit machine
+with PDP byte ordering.  Epos supports big endian architectures, but the
+corresponding code still needs to be tested.  The integers and pointers can
+be any size not less than 32 bits as long as the integers are not longer than
+pointers.  If they were, a single code change would do the port.
+
+TCP/IP networking is not strictly necessary, but if you don't have it, you
+can either try to adapt the QNX IPC proxy for your favourite IPC interface,
+or you can build the monolithic binary of Epos.  
+
+A bourne-compatible shell is helpful, as it allows to run a configure
+script.  Otherwise you have to write a <tt>src/config.h</tt> file by hand
+as we have done with the Windows ports.  A plain old <tt>make</tt> utility
+helps the compilation process if your OS can emulate a UNIX development
+environment a little bit.
+
+<sect1> More Information
+<p>
+
+The header files mostly define basic interfaces for individual Epos components.
+Reading the ones related to a specific piece of code may often clarify things.
+Lots of global data declarations live in <tt/common.h/; others (especially
+small, library-like functions) can be found in <tt/interf.h/.
+
+If you have any code or development related comment or question about Epos, send
+it to the Epos development mailing list <htmlurl url="mailto:epos&commat;braille.mff.cuni.cz"
+name="epos&commat;braille.mff.cuni.cz">.  You are also encouraged to subscribe to the
+list first by sending a mail containing only the text <tt/subscribe epos/ to
+<htmlurl url="mailto:listserv&commat;braille.mff.cuni.cz"/>.
+Please spend a few seconds by trying to look up the answer in the documentation first.

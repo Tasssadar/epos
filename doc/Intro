@@ -1,0 +1,32 @@
+
+
+	This is a flexible Text-to-Speech system mostly used as
+	a research tool. It may be distributed under the terms
+	of GPL version 2 (see doc/COPYING). For doing anything
+	beyond the scope of that license, you need a written
+	permission from the authors.
+
+
+	suggested reading
+	-----------------
+
+doc/*
+doc/FORMATS	read this to see in which formats you can have the main docs
+Changes		read this if you what to know what is new in this version
+/usr/local/share/epos/cfg/czech/czech.rul	a sound example of the rules file
+
+------------------------------------------------------------------------------ 
+
+	OS requirements	
+	---------------
+
+	The following systems have been able to compile and run Epos in the past:
+
+	Linux, QNX, Digital UNIX, Ultrix, SVR4
+	DOS (including version 95, NT, 2000, XP)
+
+	Only the Linux 2.x and WinNT ports are considered maintained, the rest
+	will probably require some minor tweaking. Please contact us if you plan
+	to use some other architecture and/or are willing to take care of some
+	other port for a medium or long period of time.  We'll try to help you start.
+

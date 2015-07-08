@@ -1,0 +1,133 @@
+<perceptronStructure>
+    <trainProcedure value="stableConjugateGradient"/>
+    <weightInitProcedure value="random"/>
+    <connectionRestriction value="layered"/>
+    <dumpWeightsDelimiter value=";"/>
+    <logErrors value="errors.txt"/>
+    <params>
+        <learningRate value="0.00179619"/>
+        <epsilon value="1e-05"/>
+        <zeta value="1.5"/>
+        <c value="0.5"/>
+        <h value="0.005"/>
+        <mi value="0.001"/>
+        <mi_i value="2"/>
+        <mi_d value="0.6"/>
+    </params>
+    <layerSizes value="10-5-5-1"/>
+    <layerTransferFuncs value="logsig-logsig-linear"/>
+    <weights>
+        <stream value="-1.88657;-0.313545;-2.48183;-0.099699;-0.283297;0.806287;0.413076;0.293143;2.34139;-0.290828;-0.0439131;-1.72191;0.04805;0.243125;-0.845405;0.285331;0.305547;0.649787;-1.83904;-2.82839;1.33881;-0.241407;-0.904786;1.90699;0.0148632;-0.468671;-0.49461;2.11027;-0.374974;1.57715;-0.0765947;0;-0.832513;-1.59803;0.288078;-0.00323567;1.47491;0.725946;0.174799;-0.929099;-2.06774;0;0.281878;1.02388;-0.641207;-0.54519;-0.550286;0.621369;0.778766;-0.112741;0.310768;-0.510742;-0.4682;0.928031;1.75075;1.06288;-0.819447;1.70912;-1.82543;0.287559;0.615215;0.313052;-0.993838;-0.0411743;-0.224656;-0.893959;-0.112417;0.739476;-1.783;-0.0906256;-0.985467;-0.668413;0.280648;-0.593028;1.19757;-0.348553;1.005;0.100373;0.39143;1.8657;-0.0847773;0.55779;-2.39515;-1.71895;1.46676;-2.92994;2.60533;-1.82836;-0.901572;-2.08162;2.42568">
+            <type value="local"/>
+            <encoding value="text"/>
+            <delimiter value=";"/>
+        </stream>
+    </weights>
+    <trainingData>
+        <columns>
+            <column>
+                <use value="no"/>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="float"/>
+                <maxR value="1"/>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="0.977596"/>
+                <avg value="2.69254"/>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="0.269501"/>
+                <avg value="0.737828"/>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="float"/>
+                <maxR value="1"/>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="float"/>
+                <maxR value="1"/>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="1.58366"/>
+                <avg value="5.78209"/>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="0.28191"/>
+                <avg value="0.608829"/>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="0.69311"/>
+                <avg value="2.62886"/>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="0.267222"/>
+                <avg value="0.714925"/>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="float"/>
+                <maxR value="1"/>
+            </column>
+            <column>
+                <use value="output"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="11613.2"/>
+                <avg value="-228.977"/>
+            </column>
+        </columns>
+        <trainingDataFiles>
+            <file>
+                <streams>
+                    <stream value="nnseries_proc.txt">
+                        <type value="remote"/>
+                        <encoding value="text"/>
+                        <delimiter value="tab"/>
+                    </stream>
+                </streams>
+            </file>
+        </trainingDataFiles>
+        <ranges>
+            <range>
+                <from value="0"/>
+                <to value="-50"/>
+                <type value="train"/>
+            </range>
+            <range>
+                <from value="0"/>
+                <to value="0"/>
+                <type value="eval"/>
+                <rest value="1"/>
+            </range>
+        </ranges>
+        <series value="37"/>
+        <seriesSeparator value="------------------------------------------"/>
+        <dumpCfg value="results/trdata_%.txt"/>
+    </trainingData>
+</perceptronStructure>

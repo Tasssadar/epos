@@ -1,0 +1,35 @@
+# Irregular forms with specific letter case
+
+^cm$ centimetrù
+^dm$ decimetrù
+^Gb$ gigabitù
+^GB$ gigabajtù
+^GHz$ gigahercù
+^Hz$ hercù
+^hod$ hodin
+^kb$ kilobitù
+^kB$ kilobajtù
+^Kè$ káèé
+^kHz$ kilohercù
+^km$ kilometrù
+^ks$ kusù
+^kW$ kilovat
+^kW$ kilovathodin
+^mA$ miliampér
+^Mb$ megabitù
+^MB$ megabajtù
+^MHz$ megahercù
+^mm$ milimetrù
+^nm$ nanometrù
+^MPa$ megapaskalù
+^ms$ milisekund
+^MW$ megavat
+^MWh$ megavathodin
+^ns$ nanosekund
+^Tb$ terabitù
+^TB$ terabajtù
+^WWW$ VVV
+
+^fa$ firma
+^fy$ firmy
+^fì$ firmì

@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# Checks whether all available options are documented
+
+if [ -d "$distdir" ]; then
+	cd $distdir/src
+fi
+
+dir=./Epos.OT.tmp
+
+if [ -d $dir ]; then
+	rm -r $dir
+fi
+mkdir -p $dir
+
+srcopts=`cat ../src/options.lst \
+| grep '^STATIC\|^.STATIC\|^OPTION\|^LNG_OPTION\|^VOICE_OPTION' \
+| grep -v '^OPTIONAGGR\|^OPTIONITEM' \
+| awk '-F(' '{ printf("%s\n", $2); }' \
+| awk -F, '{ printf("%s ", $1); }' `
+for i in $srcopts; do
+	echo -n > $dir/$i
+#	ls $dir/$i
+done
+
+docopts=`awk ' /<tag>--/{print }'<../doc/options.sgml |cut -c8-60|sed 's/&lowbar;/_/g' \
+	| sed 's/\([^ <]*\)[ <].*/\1/g'`
+for i in $docopts; do
+	if rm $dir/$i 2>/dev/null; then 
+		echo -n >/dev/null
+	else
+		if [ $i != "name"  ]; then
+			if echo $i | grep -v '\*' >/dev/null; then 
+				echo Phantom documented option: $i
+			fi
+		fi
+	fi
+done
+
+rm $dir/_*
+
+for i in `(cd $dir; ls)`; do
+	echo Undocumented option: $i
+	rm -r $dir/$i
+done
+
+rmdir $dir

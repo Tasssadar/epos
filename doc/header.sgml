@@ -1,0 +1,18 @@
+<!doctype linuxdoc system>
+
+<article>
+<title>		The Epos Speech System
+<author>	Jirka Hanika <htmlurl url="mailto:geo&commat;cuni.cz" name="geo&commat;cuni.cz">
+<date>		CURRENT_EPOS_DATE
+<abstract>
+
+The Epos Speech System: User Documentation, as distributed with Epos version
+CURRENT_EPOS_VERSION.
+
+Copyright (c) 1996-2005 by Jirka Hanika. This document is a part of the Epos
+Speech System and is therefore covered by the General Public License
+(see doc/COPYING). 
+
+</abstract>
+
+<toc>

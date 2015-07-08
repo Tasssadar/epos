@@ -1,0 +1,35 @@
+
+If you have a recent version of sgml-tools installed, you can compile
+the documentation into various formats:
+
+make epos.txt		text-only doc, to be viewed with "less"
+make epos.dvi		finely typeset doc, to be printed with "dvips"
+make epos.ps		postscript file, as above
+make epos.html		a hypertext documentation, to be viewed e.g. with "lynx"
+make epos.info		GNU info documentation, to be viewed with "info" or "emacs"
+
+If you are a developer, please make any changes to the original .sgml files only
+The other formats are generated automatically from the .sgml source files as
+shown.
+
+
+-----------------------------------------------------------------
+
+Possibly outdated notes: Necessary changes to the sgml-tools.
+
+(i)   &ecaron; should be understood as an "e" with a caron
+	or replaced with just plain "e" in intro.sgml
+(ii)  /usr/lib/sgml-tools/dist/fmt_latex2e.pl must not escape
+      | at every context. This would break the <tabular ca="...">
+      tag.
+(iii) had to \input english.sty (from babel) somewhere, e.g. in linuxdoc.sty
+      to avoid "undefined language" errors
+(iv)  had to change the &commat; entity handling in
+      /usr/lib/entity-map/*/ISOnum.2html
+      (translate commat; to a simple @ character instead of &commat;).
+      Without this change, the resulting html (almost) does work with
+      the lynx browser, but it doesn't work e.g. with Netscape Navigator.
+
+(maybe maybe not)
+
+nsgmls reports line numbers in epos.sgml

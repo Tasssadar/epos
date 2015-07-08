@@ -1,0 +1,662 @@
+/*
+ *	epos/src/options.lst
+ *	(c) 1997-2003 geo@cuni.cz
+ *
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License in doc/COPYING for more details.
+ *
+ *	You should never need to read this file; the documentation
+ *	in doc/english/options.sgml should cover at least all
+ *	generally useful options.  However, if you suspect it is
+ *	incorrect or incomplete, just skip this comment and several
+ *	kilobytes of preprocessing directives and you come to the
+ *	source-level definition of all existing options, including
+ *	unnamed options that cannot be changed from outside.
+ *
+ *	This file is the only place where the individual options are defined.
+ *	It gets included thrice in options.h, options.cc, voice.h and voice.cc
+ *	to produce first the declaration, then the definition, and finally,
+ *	the array of options to be parsed by load_config().
+ *	
+ *	Note that you should #define exactly one of the following:
+ * 
+ *	CONFIG_DECLARE, CONFIG_INITIALIZE, CONFIG_DESCRIBE,
+ *	CONFIG_VOICE_DECLARE, CONFIG_VOICE_INITIALIZE, CONFIG_VOICE_DESCRIBE
+ *	CONFIG_LANG_DECLARE, CONFIG_LANG_INITIALIZE, CONFIG_LANG_DESCRIBE
+ *	CONFIG_STATIC_DECLARE, CONFIG_STATIC_INITIALIZE, CONFIG_STATIC_DESCRIBE
+ *
+ *	when this file is included and any of these flags will be undefined
+ *	again when this file is over. They will cause OPTION to be expanded
+ *	to a declaration and initialization of the respective member of
+ *	struct configuration, and to its corresponding item in the optlist
+ *	(which drives the type dependent parsing of the member). VOICE_OPTION
+ *	expands to OPTION and, moreover, it will setup a struct voice member
+ *	in an analogous way. The same for LNG_OPTION and struct lang.
+ *	For STATIC_OPTION, only the struct static_cfg is filled.
+ *
+ *	This scheme (the first three flags) was introduced in version 1.1.6.
+ *
+ *	The format is obvious. The last field is the default value. 
+ */
+
+#define STATIC_OPTION(name, type, default)	/* ignore unless redefined */
+
+/*
+ *	The following is relatively deep cpp magic.  Please read
+ *	info -f cpp -n "Argument Prescan"
+ *	if you are curious about the doubly indirect expansion of #s.
+ */
+
+# define strfy(s) #s
+# define stringify(s) strfy(s)
+
+#ifdef CONFIG_DECLARE
+
+#define BOOL   bool
+#define INT    int
+#define STR    const char*
+#define LIST   const char*
+#define CHAR   unsigned char
+#define ELEM   UNIT
+#define MARKUP OUT_ML
+#define SALT   int
+#define TYPE   SYNTH_TYPE
+#define CHANNEL    CHANNEL_TYPE
+#define CHARSET    int
+
+#define OPTION(name,type,default) type name;
+
+#define OPTIONAGGR(x) x;
+#define OPTIONITEM(w,x,y,z) 
+#define OPTIONAGGRENDS 
+
+#define VOICE_OPTION(name,type,default) OPTION(name,type,default)
+#define LNG_OPTION(name,type,default)  OPTION(name,type,default)
+
+#define OPTIONARRAY(name, type, default, number)	type name[number];
+#define STATICARRAY(name, type, default, number)
+#define LNG_OPTIONARRAY(name, type, default, number)	type name[number];
+
+#undef CONFIG_DECLARE
+
+#else                 //#ifdef CONFIG_INITIALIZE or CONFIG_DESCRIBE or CONFIG_INV*
+
+#ifdef CONFIG_INITIALIZE
+#define OPTION(name,type,default) cfg->name=default;
+
+#define OPTIONAGGR(x)
+#define OPTIONITEM(id,name,type,default) cfg->id = default;
+#define OPTIONAGGRENDS
+
+#define VOICE_OPTION(name,type,default) OPTION(name,type,default)
+#define LNG_OPTION(name,type,default)  OPTION(name,type,default)
+
+#define OPTIONARRAY(name, type, default, number)     do { for (int index=0; index<number; index++) cfg->name[index]=default; } while (0);
+#define STATICARRAY(name, type, default, number)
+#define LNG_OPTIONARRAY(name, type, default, number) do { for (int index=0; index<number; index++) cfg->name[index]=default; } while (0);
+
+#undef CONFIG_INITIALIZE
+
+#else                 //#ifdef CONFIG_DESCRIBE or CONFIG_INV*
+#ifdef CONFIG_DESCRIBE
+
+#define BOOL   O_BOOL
+#define INT    O_INT
+#define STR    O_STRING
+#define LIST    O_LIST
+#define CHAR   O_CHAR
+#define ELEM   O_UNIT
+#define MARKUP O_MARKUP
+#define SALT   O_SALT
+#define TYPE   O_SYNTH
+#define CHANNEL    O_CHANNEL
+#define CHARSET    O_CHARSET
+
+#define OPTION(name,type,default) {"C:" stringify(name) + 2, type, OS_CFG, A_PUBLIC, A_PUBLIC, true, false, (long int)&((configuration *)NULL)->name},
+
+#define OPTIONAGGR(x) 
+#define OPTIONITEM(id,name,type, default) {"C:" stringify(name) + 2, type, OS_CFG, A_PUBLIC, A_PUBLIC, true, false, (long int)&((configuration *)NULL)->id},
+#define OPTIONAGGRENDS 
+
+#define VOICE_OPTION(name,type,default) OPTION(name,type,default)
+#define LNG_OPTION(name,type,default)  OPTION(name,type,default)
+
+#define OPTIONARRAY(name, type, default, number) {"C:" stringify(name) + 2, type, OS_CFG, \
+		A_PUBLIC, A_PUBLIC, true, true, (long int)&((configuration *)NULL)->name},
+#define STATICARRAY(name, type, default, number)
+#define LNG_OPTIONARRAY(name, type, default, number)  \
+		OPTIONARRAY(name, type, default, number)
+
+#undef CONFIG_DESCRIBE
+
+
+#else
+#ifdef CONFIG_LANG_INITIALIZE
+
+#define BOOL
+#define INT
+#define STR	STRING_COPY
+#define LIST	STRING_COPY
+#define CHAR
+#define ELEM
+#define MARKUP
+#define SALT
+#define TYPE
+#define CHANNEL
+#define CHARSET
+
+#define STRING_COPY(x) (x ? strdup(x) : NULL)
+
+#define OPTIONAGGR(x)
+#define OPTIONITEM(w,x,y,z)
+#define OPTIONAGGRENDS
+
+#define OPTION(x,y,z)
+#define VOICE_OPTION(name,type,default) name = type(cfg->name);
+#define LNG_OPTION(name,type,default)  name = type(cfg->name);
+
+#define OPTIONARRAY(name, type, default, number)
+#define STATICARRAY(name, type, default, number)
+#define LNG_OPTIONARRAY(name, type, default, number)  do { for (int index=0; index<number; index++) name[index] = cfg->name[index]; } while (0);
+
+#undef CONFIG_LANG_INITIALIZE
+
+#else
+#ifdef CONFIG_LANG_DECLARE
+
+#define BOOL   bool
+#define INT    int
+#define STR    const char *
+#define LIST   const char *
+#define CHAR   unsigned char
+#define ELEM   UNIT
+#define MARKUP OUT_ML
+#define SALT   int
+#define TYPE   SYNTH_TYPE
+#define CHANNEL    CHANNEL_TYPE
+#define CHARSET    int
+
+#define OPTIONAGGR(x)
+#define OPTIONITEM(w,x,y,z)
+#define OPTIONAGGRENDS
+
+#define OPTION(x,y,z)
+#define VOICE_OPTION(name,type,default)    type  name;
+#define LNG_OPTION(name,type,default)      type  name;
+
+#define OPTIONARRAY(name, type, default, number)
+#define STATICARRAY(name, type, default, number)
+#define LNG_OPTIONARRAY(name, type, default, number)  type name[number];
+
+#undef CONFIG_LANG_DECLARE
+
+#else
+#ifdef CONFIG_LANG_DESCRIBE
+
+#define BOOL   O_BOOL
+#define INT    O_INT
+#define STR    O_STRING
+#define LIST   O_LIST
+#define CHAR   O_CHAR
+#define ELEM   O_UNIT
+#define MARKUP O_MARKUP
+#define SALT   O_SALT
+#define TYPE   O_SYNTH
+#define CHANNEL    O_CHANNEL
+#define CHARSET    O_CHARSET
+
+#define OPTIONAGGR(x)
+#define OPTIONITEM(w,x,y,z)
+#define OPTIONAGGRENDS
+
+#define OPTION(x,y,z)
+#define VOICE_OPTION(name,type,default)   {"L:" stringify(name) + 2, type, OS_LANG, A_PUBLIC, A_PUBLIC, true, false, (long int)&((lang *)NULL)->name},
+#define LNG_OPTION(name,type,default)  {"L:" stringify(name) + 2, type, OS_LANG, A_PUBLIC, A_PUBLIC, true, false, (long int)&((lang *)NULL)->name},
+
+#define OPTIONARRAY(name, type, default, number)
+#define STATICARRAY(name, type, default, number)
+#define LNG_OPTIONARRAY(name, type, default, number) {"L:" stringify(name) + 2, type, OS_LANG, \
+		A_PUBLIC, A_PUBLIC, true, true, (long int)&((lang *)NULL)->name},
+
+
+#undef CONFIG_LANG_DESCRIBE
+
+
+#else		// VOICE_anything,  STATIC_anything
+
+#define OPTION(x,y,z)
+#define LNG_OPTION(name,type,default)
+#define OPTIONAGGR(x)
+#define OPTIONITEM(w,x,y,z)
+#define OPTIONAGGRENDS
+#define OPTIONARRAY(name, type, default, number)
+#define LNG_OPTIONARRAY(name, type, default, number)
+
+
+
+#ifdef CONFIG_VOICE_INITIALIZE
+
+#define BOOL
+#define INT
+#define STR	STRING_COPY
+#define LIST	STRING_COPY
+#define CHAR
+#define ELEM
+#define MARKUP
+#define SALT
+#define TYPE
+#define CHANNEL
+#define CHARSET
+
+#define STRING_COPY(x) (x ? strdup(x) : NULL)
+
+#define VOICE_OPTION(name,type,default)  name = type(parent_lang->name);
+
+#define STATICARRAY(name, type, default, number)
+
+#undef CONFIG_VOICE_INITIALIZE
+
+#else
+#ifdef CONFIG_VOICE_DECLARE
+
+#define BOOL   bool
+#define INT    int
+#define STR    const char *
+#define LIST   const char *
+#define CHAR   unsigned char
+#define ELEM   UNIT
+#define MARKUP OUT_ML
+#define SALT   int
+#define TYPE   SYNTH_TYPE
+#define CHANNEL    CHANNEL_TYPE
+#define CHARSET    int
+
+#define VOICE_OPTION(name,type,default)   type  name;
+
+#define STATICARRAY(name, type, default, number)
+
+#undef CONFIG_VOICE_DECLARE
+
+#else
+#ifdef CONFIG_VOICE_DESCRIBE
+
+#define BOOL   O_BOOL
+#define INT    O_INT
+#define STR    O_STRING
+#define LIST   O_LIST
+#define CHAR   O_CHAR
+#define ELEM   O_UNIT
+#define MARKUP O_MARKUP
+#define SALT   O_SALT
+#define TYPE   O_SYNTH
+#define CHANNEL    O_CHANNEL
+#define CHARSET    O_CHARSET
+
+#define VOICE_OPTION(name,type,default)  {"V:" stringify(name) + 2, type, OS_VOICE, A_PUBLIC, A_PUBLIC, true, false, (long int)&((voice *)NULL)->name},
+
+#define STATICARRAY(name, type, default, number)
+
+#undef CONFIG_VOICE_DESCRIBE
+
+#else
+#ifdef CONFIG_STATIC_INITIALIZE
+
+#undef STATIC_OPTION
+#define STATIC_OPTION(name,type,default) name=default;
+#define OPTION(name,type,default)
+
+#define VOICE_OPTION(name,type,default)
+#define LNG_OPTION(name,type,default)
+
+#define STATICARRAY(name, type, default, number)     do { for (int index=0; index<number; index++) scfg->name[index]=default; } while (0);
+
+#undef CONFIG_STATIC_INITIALIZE
+
+#else
+#ifdef CONFIG_STATIC_DECLARE
+
+#define BOOL   bool
+#define INT    int
+#define STR    const char *
+#define LIST   const char *
+#define CHAR   unsigned char
+#define ELEM   UNIT
+#define MARKUP OUT_ML
+#define SALT   int
+#define TYPE   SYNTH_TYPE
+#define CHANNEL    CHANNEL_TYPE
+#define CHARSET    int
+
+#undef STATIC_OPTION
+#define STATIC_OPTION(name,type,default) type name;
+#define OPTION(name, type, default)
+
+#define VOICE_OPTION(name,type,default)
+#define LNG_OPTION(name,type,default)
+
+#define STATICARRAY(name, type, default, number)	type name[number];
+
+#undef CONFIG_STATIC_DECLARE
+
+#else
+#ifdef CONFIG_STATIC_DESCRIBE
+
+#define BOOL   O_BOOL
+#define INT    O_INT
+#define STR    O_STRING
+#define LIST   O_LIST
+#define CHAR   O_CHAR
+#define ELEM   O_UNIT
+#define MARKUP O_MARKUP
+#define SALT   O_SALT
+#define TYPE   O_SYNTH
+#define CHANNEL    O_CHANNEL
+#define CHARSET    O_CHARSET
+
+#undef STATIC_OPTION
+#define STATIC_OPTION(name,type,default) {"S:" stringify(name) + 2, type, OS_STATIC, A_PUBLIC, A_PUBLIC, true, false, (long int)&((static_configuration *)NULL)->name},
+#define OPTION(name,type,default) 
+
+#define VOICE_OPTION(name,type,default)
+#define LNG_OPTION(name,type,default)
+
+#define STATICARRAY(name, type, default, number) {"S:" stringify(name) + 2, type, OS_STATIC, \
+		A_PUBLIC, A_PUBLIC, true, true, (long int)&((static_configuration *)NULL)->name},
+
+
+#undef CONFIG_STATIC_DESCRIBE
+
+#else
+#error  Impossible inclusion of option.lst, whee...
+
+#endif                //CONFIG_STATIC_DESCRIBE
+#endif                //CONFIG_STATIC_DECLARE
+#endif                //CONFIG_STATIC_INITIALIZE
+#endif                //CONFIG_VOICE_DESCRIBE
+#endif                //CONFIG_VOICE_DECLARE
+#endif                //CONFIG_VOICE_INITIALIZE
+#endif                //CONFIG_LANG_DESCRIBE
+#endif                //CONFIG_LANG_DECLARE
+#endif                //CONFIG_LANG_INITIALIZE
+#endif                //CONFIG_DESCRIBE
+#endif                //CONFIG_INITIALIZE
+#endif                //CONFIG_DECLARE
+
+
+
+#ifdef STATIC
+	#error STATIC macro collision
+#else
+	#define STATIC STATIC_OPTION
+#endif
+
+
+/*
+ *	The last argument to the following OPTION is only used when
+ *	CONFIG_STATIC_INITIALIZE has been defined (which happens in the
+ *	compilation unit where static_configuration::static_configuration is to be
+ *	defined).  In this compilation unit, BASE_DIR should be defined
+ *	externally (with a compiler option).
+ */
+
+#ifndef BASE_DIR
+	# define BASE_DIR /usr/local/share/epos
+#endif
+
+STATIC (base_dir,	STR, strdup(stringify(BASE_DIR)))// base path to everything
+
+
+STATIC (debug,		BOOL, false)  // Whether to print any debug info at all
+STATIC (debug_level,	INT, 4)	// minimum level of debug messages
+
+STATIC (_loaded,	BOOL, false)  // Do we have already compiled the .ini files?
+STATIC (fixed_ini_file,	STR, strdup("fixed.ini"))
+STATIC (cfg_file,	STR, NULL)
+			// FIXME: this should become a constant, not an option; or to become changeable
+			// NOTE: also \031 is reserved (for the ABSENT_CHARACTER)
+STATIC (_token_esc, 	STR, strdup("nrt[eE\\ #;@~.d-mXYZWVU"))  // Escape sequences usable in text files
+STATIC (_value_esc,	STR, strdup("\n\r\t\033\033\033\\\377#;@\1\2\3\4\5\037\036\035\034\032\030"))
+STATIC (_slash_esc,	CHAR, '/')	// Path separator ('/' or '\') .ini escape seq
+
+STATIC (hashes_full,	INT, 0)		// How full should a hash table become?
+STATIC (max_errors,	INT, 0)		// How many rule file syntax errors to report?
+STATIC (max_nest,	INT, 60)	// How many @include directives may be nested?
+OPTION (multi_subst,	INT, 0)		// How many substs should apply to a word?
+OPTION (fastmatch_thres,INT, 0)		// How long words should use fastmatch?
+STATIC (fastmatch_substs,BOOL,false)    // Use fastmatch at all?
+STATIC (memory_low,	BOOL, false)  // Should we free hash tables after first use?
+STATIC (forking,	BOOL, false)  // (UNIX only) Detach using a child process?
+STATIC (asyncing,	BOOL, false)  // (UNIX only) Close files using a child process?
+STATIC (init_time,	INT, 0)	// (UNIX only) seconds to wait for daemon init
+STATIC (colored,	BOOL, false)  // Use the color escape sequences?
+STATIC (markup_language,MARKUP, ML_NONE)// Are these ANSI escape seqs or the RTF ones?
+STATIC (languages,	LIST, NULL)	// Which languages to provide?
+STATIC (version,	BOOL, false)	// Print version info to stdshriek on startup?
+STATIC (help,		BOOL, false)	// Print help on stdshriek and exit on startup?
+STATIC (long_help,	BOOL, false)	// Print also a simple list of long options?
+STATIC (neuronet,	BOOL, false)	// Initialize and use the nnet stuff
+STATIC (trusted,	BOOL, false)	// Are sanity checks in unit::sanity() unnecessary?
+OPTION (paranoid,	BOOL, false)	// Are config files out to get us? (strict syntax)
+// OPTION (stml,	BOOL, false)	// Input text are STML (as opposed to plain ASCII)?
+STATIC (show_rule,	BOOL, false)	// Print each rule before its application? DEBUGGING only!
+STATIC (pausing,	BOOL, false)	// Pause after each rule application?
+STATIC (verbose,	BOOL, false)	// When dumping rules, print them all?
+// OPTION (warn_pause,	BOOL, false)	// Pause after every warning?
+STATIC (_warnings,	BOOL, false)	// Report command line errors?
+STATIC (ptr_trusted,	BOOL, false)	// When sanity checking, allow any pointers?
+
+STATIC (variables,	INT, 0)		// About how many variables in the rules?
+STATIC (rules_in_block,	INT, 0)		// About how many rules in a block?
+STATIC (max_rule_weight,INT, 0)		// Maximum rule weight in a choice?
+STATIC (hash_search,	INT, 60)	// number of attempts at constructing
+						// a perfect hashing function
+
+STATIC (max_line_len,	INT, 512)	// How long may an input line be?
+STATIC (scratch_size,	INT, 0)		// How long may some temporary strings be?
+OPTION (dev_text_len,	INT, 0)		// How much data can we expect from a device?
+STATIC (max_text_size,	INT, 0)		// Maximum gather buffer size
+
+STATIC (end_of_file,	CHAR, 0)	// Which key should terminate user input?
+
+
+LNG_OPTION (rules_dir,	STR, NULL)  // path to the rules and banner files
+LNG_OPTION (hash_dir,	STR, NULL)  //  to the dictionaries
+LNG_OPTION (input_dir,	STR, NULL)  //  to the input file
+OPTION (pseudo_root_dir,STR, NULL)	// to the virtual file tree	// FIXME: dirs might be STATIC?
+OPTION (ttscp_help_dir,	STR, NULL)       // to the ttscp help topics
+STATIC (lang_base_dir,	STR, NULL)   // to the language descriptions
+STATIC (voice_base_dir,	STR, NULL)   // to the voice descriptions
+STATIC (inv_base_dir,	STR, NULL)	// to the segment inventories
+STATIC (ini_dir,	STR, strdup("cfg"))  // to fixed.ini and other global cfg files
+STATIC (unimap_dir,	STR, NULL)		// to unicode maps
+STATIC (wav_dir,	STR, NULL)	//      where to store .wav files
+OPTION (mbrola_binary,	STR, NULL) //	where the MBROLA synthesizer binary is installed
+LNG_OPTION (input_file,	STR, NULL)   // relative filename of the input text
+STATIC (_input_text,	STR, NULL)			// the input text itself
+LNG_OPTION (rules_file,	STR, NULL)   // relative filename of the rules text
+STATIC (stddbg_file,	STR, NULL)   // file to write debug info to (NULL...stdout)
+// OPTION (stdwarn_file,STR, NULL)// file to write warnings to (NULL...stderr)
+STATIC (stdshriek_file,	STR, NULL)   // file to write fatal errors to (NULL...stderr)
+STATIC (profile,	STR, NULL)        // file to write profiling information to
+
+STATIC (show_phones,	BOOL, false)	// Should we display the sounds on exit?	// FIXME: STATIC or OPTION?  maybe need a rename
+OPTION (label_seg,	BOOL, false)  // Should we output the segment labels?
+OPTION (label_phones,	BOOL, false)// Should we output the phone labels?
+OPTION (label_sseg,	BOOL, false)  // Mark suprasegmental boundaries in labels?
+STATIC (show_segments,	BOOL, false)  // Should we display the segments on exit?
+//STATIC (show_labels,	BOOL, false)  // Should we display the segment labels?
+STATIC (play_segments,	BOOL, false)  // Should we write the sound to a file?
+STATIC (show_raw_segs,	BOOL, false)  // show_segments including diphone numbers?
+// OPTION (show_crc,	BOOL, false)	// Near-unique signature of the sound
+// STATIC (wave_file,	STR, NULL)	// File to write .wav into if play_diphones
+STATIC (prefer_portaudio, BOOL, false)	// Prefer libportaudio to OSS for #localsound
+STATIC (local_sound_device,	STR, NULL)	// OSS #localsound device name
+STATIC (immed_segments,	BOOL, false)  // Should we output them after a SEGMENTS rule?
+
+STATIC (max_utterance,	INT, 0)
+STATIC (split_utterance,INT, 0)
+
+VOICE_OPTION (name,	STR, NULL)
+VOICE_OPTION (type,	TYPE, S_NONE)	// Int, float, vector quantified...
+VOICE_OPTION (channel,	CHANNEL,CT_MONO)// (unused; not stereo)
+VOICE_OPTION (n_segs,	INT, 0)	// Total number of segments
+VOICE_OPTION (counts,	STR, NULL)	// File with the model counts for every segment?
+VOICE_OPTION (models,	STR, NULL)	// File with the models themselves?
+VOICE_OPTION (codebook,	STR, NULL)	// File with vectors for vq voices?
+// VOICE_OPTION (dph_file,	STR, NULL)	// File describing the segments?
+VOICE_OPTION (dpt_file,	STR, NULL)	// File naming the segments?
+VOICE_OPTION (snl_file,	STR, NULL)	// Sound labels file?
+VOICE_OPTION (init_f,	INT, 0)		// Neutral frequency for the inventory
+VOICE_OPTION (init_i,	INT, 0)		// Neutral intensity
+VOICE_OPTION (init_t,	INT, 0)		// Neutral time factor
+
+VOICE_OPTION (inv_sampling_rate,INT, 0)	// The real sampling rate of the inventory
+VOICE_OPTION (sample_size,	INT, 0)	// (not supported)
+
+STATIC (sampa_alts,		STR, NULL)
+VOICE_OPTION (sampa_alternate,	SALT, 0)
+
+VOICE_OPTION (out_sampling_rate,	INT, 0)	// 0 means equal to samp_rate
+	// positive value specifies the required output rate (samp_rate divided by an integer)
+VOICE_OPTION (lpcprosody,	BOOL, false)	// F0 contour modelling using a linear prediction
+VOICE_OPTION (bang_nnet,	BOOL, false)	// F0 contour modelling using a linear prediction
+// VOICE_OPTION (nnet_phone,	BOOL, false)	// F0 contour with lpc but on the phone level
+VOICE_OPTION (f0_smoothing,	BOOL, false) // generated F0 shall be smoothed via filter after each pitchpuls
+// VOICE_OPTION (additive_cont,	BOOL, false)  // rule "contour" additive mode
+
+OPTION (pros_factor,	INT, 0)
+OPTION (label_f0,	BOOL, false)
+
+OPTION (autofilter,	BOOL, false)	// When downsampling, band filter as necessary
+
+OPTION (wave_header,	BOOL, false)  // Should .wav output contain .wav file header?
+// VOICE_OPTION (ioctlable,	BOOL, false)  // Is the voice a real device not file?
+OPTION (ulaw,		BOOL, false)	// Should .wav output use the mu law encoding?
+
+STATIC (daemon_log,	STR, NULL)	// Log file of daemon.cc activities (TTSCP server)
+STATIC (syslog,		BOOL, true)	// Use syslogd for logging if available
+STATIC (full_syslog,	BOOL, false)	// Use syslogd for logging all TTSCP traffic?
+STATIC (authpriv,	BOOL, false)  // Use authpriv facility for security relevant syslog messages?
+STATIC (log_codes,	BOOL, false)  // Should logged messages contain TTSCP codes?
+STATIC (server_pwd_file,STR, NULL)	// File to store the server passwd for TTSCP auth
+STATIC (debug_password,	STR, NULL)	// Additional server password (insecure)
+STATIC (restr_file,	STR, strdup("restr.ini")) // restricted options
+OPTION (seg_buff_size,	INT, 0)	// max n of segments to be synthesized at once - was dbsize
+OPTION (ssif_buff_size,	INT,0)	// max n bytes of SSIF to be synthesized at once
+OPTION (buffer_size,	INT, 0)	// buffer size for wave files
+OPTION (max_net_cmd,	INT, 0)  // Max TTSCP command length
+STATIC (listen_port,	INT, TTSCP_PORT) // TTSCP port where the daemon should listen
+OPTION (handle_size,	INT, 0)	// TTSCP handle size
+STATIC (local_only,	BOOL, false) // visible only to local clients ?
+OPTION (localsound,	BOOL, false) // sound card available to any client?
+OPTION (readfs,		BOOL, false) // may read files in the pseudo_root_dir?
+OPTION (writefs,	BOOL, false) // may write files in the pseudo_root_dir?
+OPTION (deadlock_timeout,INT, 0)	// remote voice timeout
+VOICE_OPTION (location,	STR, NULL)
+OPTION (_sd_in,		INT, -1)	// current input network socket
+OPTION (_sd_out,	INT, -1)	// current output network socket
+
+STATIC (pend_min,	INT, 0)	// FIXME: non-functional
+STATIC (pend_max,	INT, 0)	// FIXME: non-functional
+
+STATIC (_big_endian,	BOOL, false)  // run-time decided
+
+LNG_OPTION (voices,		LIST, NULL) // voices supported for this language
+LNG_OPTION (soft_options,	LIST, NULL)
+				// language-specific voice options supported for this language
+LNG_OPTION (permanent_fallbacks,BOOL, false)
+LNG_OPTION (fallback_mode,	INT, 0)
+LNG_OPTION (fallback_voice,	STR, NULL)
+				// voice to be used when the current one fails at run time
+STATIC (preload_voices, BOOL, false)	// initialize (or drop) all voices at daemon startup
+
+LNG_OPTION (charset,	CHARSET, 0)	// character encoding table index
+OPTION (relax_input,	BOOL, false)	// Survive unknown characters on input
+OPTION (default_char,	CHAR, 0)	// Replace them with this char
+
+STATIC (header,		STR, NULL)     // Header and footer printed
+STATIC (footer,		STR, NULL)     //   in unit::fout()
+
+STATIC (normal_color,	STR, NULL)
+STATIC (curr_rule_color,STR, NULL)
+STATIC (fatal_color,	STR, NULL)
+
+STATIC (shriek_art,	INT, 0)	// Number of picture printed on fatal errors
+
+STATIC (comma,		STR, NULL)// Delimiter character for generated lists
+
+STATIC (unit_levels,	STR, NULL)
+STATIC (_segm_level,	ELEM, 0)
+STATIC (_phone_level,	ELEM, 0)
+STATIC (_text_level,	ELEM, 0)
+STATIC (default_scope,	ELEM, 0)
+STATIC (default_target,	ELEM, 0)
+
+LNG_OPTIONARRAY (perm,		STR, NULL, UNIT_MAX)
+LNG_OPTIONARRAY (perm_input,	STR, NULL, UNIT_MAX)
+LNG_OPTIONARRAY (perm_working,	STR, NULL, UNIT_MAX)
+LNG_OPTION (downgradables,	STR, NULL)
+
+OPTIONARRAY (pros_weight,	INT, 1, UNIT_MAX)	// FIXME: make all these STATIC
+
+// OPTION (sseg_weights_denom,	INT, 1) never used, maybe some day
+
+OPTIONAGGR (bool pros_mul[3])
+OPTIONITEM (pros_mul[Q_FREQ], pros_eff_multiply_f,	BOOL, false)
+OPTIONITEM (pros_mul[Q_INTENS], pros_eff_multiply_i,	BOOL, false)
+OPTIONITEM (pros_mul[Q_TIME], pros_eff_multiply_t,	BOOL, false)
+OPTIONAGGRENDS
+
+OPTIONAGGR (int pros_neutral[3])
+OPTIONITEM (pros_neutral[Q_FREQ], pros_neutral_f,	INT, 0) // Neutral (unmarked) frequency
+OPTIONITEM (pros_neutral[Q_INTENS], pros_neutral_i,	INT, 0) // Neutral intensity
+OPTIONITEM (pros_neutral[Q_TIME], pros_neutral_t,	INT, 0) // Neutral time factor
+OPTIONAGGRENDS
+
+// VOICE_OPTION (t_i_adj,	BOOL, false)	// Adjust neutral time/intensity for some segments
+
+
+
+STATIC (structured,		BOOL, false) // Will unit::fout display other units than phones?
+STATIC (postfix,		BOOL, false) // Content char follows the offspring?
+STATIC (prefix,			BOOL, false) // Content char precedes the offspring?
+STATIC (swallow_underbars,	BOOL, false) // Skip underbars to be printed?
+
+STATICARRAY (begin,	STR, NULL, UNIT_MAX)
+STATICARRAY (separ,	STR, NULL, UNIT_MAX)
+STATICARRAY (close,	STR, NULL, UNIT_MAX)
+STATICARRAY (color,	STR, NULL, UNIT_MAX)
+
+# undef strfy
+# undef stringify
+
+#undef BOOL
+#undef STR
+#undef LIST
+#undef INT
+#undef CHAR
+#undef ELEM
+#undef MARKUP
+#undef SALT
+#undef TYPE
+#undef CHANNEL
+#undef CHARSET
+
+#undef LNG_OPTIONARRAY
+#undef OPTIONARRAY
+#undef STATICARRAY
+#undef OPTIONAGGR
+#undef OPTIONITEM
+#undef OPTIONAGGRENDS
+#undef OPTION
+#undef VOICE_OPTION
+#undef LNG_OPTION
+#undef STATIC_OPTION
+#undef STATIC

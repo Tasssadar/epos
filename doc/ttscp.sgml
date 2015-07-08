@@ -1,0 +1,917 @@
+
+<sect>Text-To-Speech Control Protocol (version 0) <label id="ttscp">
+<p>
+
+TTSCP is a client-server connection-oriented,
+both human- and machine-readable communication protocol,
+remotely similar to the File Transfer Protocol in spirit.
+TTSCP is offered as a standard interface for controlling
+generic speech processing applications, not only Text-To-Speech ones.
+It is primarily designed to run atop TCP, but any reliable
+connection-oriented underlying protocol should theoretically
+work as well.
+
+The server awaits new connections on a single TCP port.
+There are two types of connections: <em/control connections/
+used to issue commands by the client and to return status
+information, such as completion messages by the server,
+and <em/data connections/ used to transfer the actual data.
+Immediately after the underlying connection is opened,
+the server transmits a <em/session header/ (see below)
+and treats the connection as a control connection, until
+the <tt/data/ command is issued by the client, causing
+it to become a data connection.  
+
+Every TTSCP connection (both a control one and a data one) obtains
+a connection handle from the server inside the session header.
+This handle is a string of alphanumeric characters which
+uniquely identifies the connection and which also serves
+as an access token for it. Other connections can use such
+a handle to interrupt a control connection's task in progress,
+to disconnect any connection, to process data received from
+a data connection etc.
+
+A <em/TTSCP session/ is a sequence
+of commands, their results and referenced data lasting
+from setting up the control connection until its disconnection
+or the <tt/data/ command.
+Any party may quit the session at any time, but must advise
+the other one either by the <tt/done/ command (the client)
+or by a <tt/600/ response code or higher (the server).
+If a <tt/done/ command is sent before a preceding command
+has completed, the server will proceed with the
+preceding commands. If a <tt/600/ or higher error code
+is received as a response to a command and subsequent commands
+have already been sent by the client, they will not be executed.
+
+A data connection may be silently disconnected by the client
+at any time.  To allow reliable disconnection detection by the
+server, every data connection is attached to an already
+existing control connection (as specified with the <tt/data/
+command) and it will be automatically disconnected when
+the control connection is disconnected.  This attachment relation
+doesn't prevent other control connections from referencing this
+data connection using its handle, it only limits its lifetime.
+
+The session header (as sent before a TTSCP session starts)
+is a sequence of lines.  The first line
+shall exactly match the string <tt/TTSCP spoken here/; the clients
+are strongly encouraged to use this string to identify the protocol.
+Each of the following lines contains
+a TTSCP header keyword terminated by a colon and a single space
+and the value associated with the keyword. The client may choose
+not to use these values at all, or to scan only for some header
+keywords.  The last line in the header shall contain the <tt/handle/
+keyword.
+
+A typical TTSCP session looks like this, with client commands
+unindented and server responses indented.
+
+<tscreen><verb>
+	TTSCP spoken here
+	protocol: 0
+	extensions:
+	server: Epos
+	release: 2.4.6
+	handle: O29-m2UZ
+user user&commat;host.domain.net
+	452 user not found
+setl some_option on
+	200 OK
+strm $zC-4EEl0:raw:rules:diphs:synth:/dev/dsp
+	200 OK
+appl 34
+	112 started
+	122 total bytes
+	 3622
+	123 written bytes
+	 3622
+	200 OK
+done
+	600 goodbye
+</verb></tscreen>
+
+
+The "user" and "done" commands may become mandatory, the rest may
+be freely used between them. For the interaction with a human, the
+"help" command is available.
+
+It is legal to use "anonymous" instead of the address in the user
+command: "user anonymous". It is also legal to switch users
+with additional user commands. This may cause context switches.
+
+It is advised to check the greeting string received to begin in 
+"TTSCP ". If it doesn't, the client or possibly the
+server may be obsolete or an unrelated protocol may be used at the
+port.
+
+In this document, a "newline" produced by the server or the client should be
+a <tt/CR LF/ character sequence.  It is allowed for both parties to
+accept a <tt/LF/ character without a preceding <tt/CR/ character as a valid
+line separator, but it is never legal to rely on this practice.
+
+<sect1>Session Header Keywords
+<p>
+
+The set of session header keywords and their sequence may vary between
+TTSCP implementations.  Some lower case keywords are defined by this document;
+in addition, any implementation may supply its own keywords provided
+their first two characters are lower case <tt/x/ and dash, respectively,
+or they consist solely of upper case letters.  Both standard and
+implementation specific keywords are limited to upper and lower case
+letters (case sensitive), digits, dashes and underlines;
+however, the values associated with some keywords may contain any printable
+ISO 8859 characters.  There are three mandatory keywords
+(<tt/protocol/, <tt/extensions/ and <tt/handle/, in order of appearance
+in the session header).
+
+<descrip>
+<tag>extensions</tag>
+	The value is a whitespace separated list of semi-standard and non-standard
+	extensions supported by this TTSCP server.  Only extensions defined by
+	this document or a future version of this document should be advertised;
+	custom or experimental extensions may be advertised provided their
+	first two characters are lower case <tt/x/ and dash, respectively.
+	At present, there are no extensions defined, so the list should be empty,
+	but this keyword is nevertheless mandatory.
+<tag>handle</tag>
+	The value is a connection handle for this control connection. The handle
+	stays valid when the connection is turned into a data connection.  Only 
+	lower and upper case letters, digits, dashes and underlines may occur in
+	the handle.  This keyword is mandatory and must appear last in the session
+	header.
+<tag>protocol</tag>
+	The value is a decimal number identifying the major TTSCP protocol version.
+	The current protocol version number is <tt/0/ (previous versions had no
+	session header).  It is likely that protocol versions unknown to the
+	client will be fundamentally incompatible.  It is mandatory to begin the
+	session header with this keyword.  It is recommended to check it on the
+	client side.
+<tag>release</tag>
+	Server release.  The formatting and interpretation is implementation dependent.
+<tag>server</tag>
+	Server name.  Different versions of the same implementation should
+	typically use an identical value for this keyword.
+</descrip>
+
+
+<sect1>Data Formats<label id="formats">
+<p>
+
+The data is passed between modules in one of the following formats:
+
+<itemize>
+	<item> plain text
+	<item> phonetic structure of the text (TSR)
+	<item> Speech Synthesizer Input Format (SSIF)
+	<item> sequence of segments
+	<item> waveform file
+</itemize>
+
+<sect2> Plain Text
+<p>
+This is what the "text" in "text-to-speech" stands for.
+
+<sect2> Text Structure Representation
+<p>
+Internal text representation, suitable for arbitrary processing, but
+unsuitable for input or output. Before output, it must be converted
+to another format first. For a description, see the <ref id="tsr"
+name="text structure representation overview">.
+
+Conversion to plain text dismisses prosody.
+
+Conversion to plain text dismisses segment layer if any.
+
+<sect2> Speech Synthesizer Input Format
+<p>
+
+This format has been introduced by the MBROLA synthesizer
+development team.  Together with the "sequence of segments"
+it is one of the two possible input formats to a speech
+synthesizer in Epos.  With the MBROLA synthesizer you have
+to use SSIF.
+
+SSIF is line oriented, each line corresponding to a single phone;
+the line contains several whitespace separated components.
+
+The first component is the SAMPA notation of the phone;
+the second component is its duration in milliseconds.
+
+Subsequent components are prosody points.  Each prosody point
+is enclosed in parentheses and consists of two or three
+integers separated by commas.  The first value locates
+the prosody point within the phone per cent (e.g. the value
+of <tt/99/ corresponds to just before the end of the phone);
+the second value indicates the desired pitch at that prosody
+point (the value of <tt/100/ indicates the default pitch);
+the third value, which is not currently supported by MBROLA,
+and which is optional, indicates the intensity at that point.
+It is the responsibility of the synthesizer to do piecewise
+linear interpolation between prosody points.
+
+<sect2> Sequence of Segments
+<p>
+
+Every segment is a quadruple of segment number, assigned frequency (pitch),
+intensity (volume) and time factor (speed). The initial segment is dummy
+(to be skipped); its segment number contains the total number of segments
+in this sequence. The corresponding prosodic parameters are undefined.
+They should preferably be zero.
+
+The integer values should be encoded as 32-bit little endian
+integers.  
+
+This format is currently being replaced by SSIF, although it will
+remain to be supported for some additional period time.
+
+<sect2> Waveform
+<p>
+The traditional MS Windows RIFF <tt/.wav/ file header and data.
+Two liberties may be taken when waveform data in this format is sent
+via a data connection.
+
+First, the total length of the RIFF form field
+may contain a negative number.  In this case, the length
+of the form shall be determined from the data length as indicated
+in the corresponding TTSCP control connection.  Also, if this
+field contains a positive number, which conflicts with the data
+length indicated in the corresponding TTSCP control connection,
+the recipient may choose any one of them or return a <tt/435/ error.
+
+Second, if only <tt/fmt/ and <tt/data/ chunks are present in the
+RIFF form being sent, and the length of the data chunk is negative,
+the length of the <tt/data/ chunk shall be determined from the
+total length of the RIFF form. (Epos never actually takes advantage
+of this rule.)
+
+This format allows storing labels (i.e. pointers to specific
+positions within the waveform); Epos does use this feature
+if enabled e.g. using the <ref id="labelphones-option" name="label_phones option">
+to label phone and/or segment boundaries within the waveform.
+
+<sect1> TTSCP Commands
+<p>
+
+TTSCP commands are newline-terminated strings. Each of them begins
+with a command identifier, some of them may continue with optional
+or mandatory parameters, depending on the particular command.
+Each command generates one or more "replies", the last reply
+indicating completion and sometimes also some command-specific
+information.
+
+<sect2> <tt> appl </tt> <label id="appl-cmd">
+<p>
+
+Apply the current data processing stream (see the <ref id="strm-cmd" name="strm command">
+to some data. The parameter is a decimal number specifying the number
+of bytes to be processed.
+
+Before the completion reply, zero or more 122 replies are received
+by the client, every one followed by a decimal number on a line
+by itself, preceded with a single space. This is the number of
+bytes written by the output module per task.  Usually, if the <tt/appl/
+command generates a single successful task only, there shall be exactly
+one such reply, but if e.g. the <ref id="chunk-mod" name="chunk"> module has split the
+input text into more independent parts, multiple outputs and
+multiple 122 replies may appear; if e.g. the <ref id="join-mod" name="join"> module has
+been employed, there may be no 122 reply at all if the text being
+processed is considered unterminated.
+Such an intermediate reply should be sent as soon as the number
+of bytes to be sent is known to the TTSCP server to avoid certain
+deadlock scenarios caused by an insufficient buffer capacity between
+the server and the client. The number of bytes actually sent may
+be even smaller in case of a user break or another unexpected situation;
+it shall never be larger and it shall be exactly the number of bytes
+sent by the server upon a successful completion reply.
+
+Before the completion reply, one or more 123 replies for every 122 reply
+are received
+by the client. Every 123 reply is followed by a decimal number
+on a line by itself, preceded with a single space.  This is the
+number of bytes actually successfully written by the output module.
+This intermediate reply should be sent as soon as the data is
+sent.  When the client eventually receives a successful completion reply,
+the sum of byte counts received with 123 replies shall match
+the number of bytes sent by the server.
+
+For every 122 reply, there shall be a corresponding sequence of 123 replies
+such that no unrelated 122 or 123 replies intervene.  The sum of byte counts
+received with these 123 replies shall match the byte count received with
+the 122 reply.  In other words, the replies relating to different subtasks
+must preserve the time ordering.  If an error condition prematurely terminates
+the <tt/appl/ command processing, this behavior is not required for
+the last subtask whose processing has begun, independent of whether
+its 122 reply has been received by the client.
+
+The relative ordering of 122 and 123 replies for the same subtask
+is not specified by the TTSCP.
+
+The completion response code is received when all the modules have
+finished processing and data has been output by the output module.
+Some of the data may however still be being processed by hardware,
+e.g. a sound card, or may be delayed by the network.
+
+Using <tt/appl/ before the first <tt/strm/ command is forbidden.
+
+<sect2> <tt> intr </tt>
+<p>
+
+Interrupt a single <tt/appl/ command in progress. The parameter is a control connection
+handle and specifies the connection which issued
+the command to be interrupted.
+
+The server should try to discard as much pending data as possible,
+including e.g. waveform data already written to a sound card.
+If however multiple <tt/appl/ commands have been sent simultaneously,
+only the one in progress will be interrupted.
+
+The server will reply a 401 completion code to the interrupted
+connection, whereas a 200 completion code will acknowledge
+a successful <tt/intr/ command.
+
+If there is no stream associated with the connection to be interrupted
+or there is no apply command in progress on it, a 423 reply will be
+issued to the interrupting connection and the interrupting connection
+will not be affected.
+
+<sect2> <tt> data </tt>
+<p>
+
+Turn this control connection into a data connection. The parameter
+is the handle of an existing control connection to attach this connection to.
+The sole consequence of this attachment relation is a disconnect of the
+data connection when the specified control connection is disconnected.
+(It is therefore common for a client to open two connections, to get their
+connection handles, to turn one into a data connection and to attach it
+to the other connection.  That way the client obtains a control and a data
+connection which will gracefully shutdown even after the client abruptly
+disconnects.)
+
+The server sends a completion reply for this command (response code 200 if successful).
+After the first newline character following the 200 response code is received,
+no more control information will arrive. Likewise, the client may not send any
+TTSCP commands after the newline-terminated data command.
+If the <tt/data/ command is not successful because of capacity or other reasons,
+the connection stays in a valid
+TTSCP control connection state and more commands may be submitted.
+
+The data connection becomes valid at receipt of a 200 response code to
+this command.
+
+<sect2> <tt> delh </tt>
+<p>
+
+Terminate a specified data connection. The parameter is the data connection handle
+to be terminated, as returned by a former <tt/data/ command on that connection.
+If successful, the connection is disconnected by the server and the data connection
+handle is forgotten.
+
+<sect2> <tt> done </tt>
+<p>
+
+Issued as the last command in a session. The client may exit just
+after sending this command. The server should reply with error
+code 600.
+
+<sect2> <tt> down </tt>
+<p>
+
+Stop the server. Quit pending sessions. May disappear in the future.
+
+<sect2> <tt> help </tt>
+<p>
+
+Request for TTSCP syntax help. The server response is undefined
+except for the proper error code termination (class 2 or 4).
+
+Suggested behavior is to reply with "441 help yourself"
+or a brief list of commands with explanation.
+If a parameter is given, the server may supply more 
+specific information, such as verbose description of a single
+command.
+
+The usual completion reply rules apply. Specifically, care
+must be taken lest the help text contain a line beginning
+with a digit.
+
+<sect2> <tt> pass </tt>
+<p>
+
+Attempts to validate an account, as given by a previous "user"
+command. If no valid "user" command was ever received, the internal
+server password may be used. This may enable some internal commands
+such as "down" or "setg".  (Epos stores this internal password
+in /var/run/epos.pwd while it is listening on the standard
+TTSCP port.)
+
+The password is a string of alphanumeric characters, dashes and
+underlines, no more than 250 bytes long.
+
+<sect2> <tt> setg </tt>
+<p>
+
+Globally set a server configuration parameter. The parameter is
+a whitespace-separated "option value" pair. The server may ignore
+this command altogether with an error code 442. The server will
+reply with an error code 412 if the value assigned is illegal,
+or with 451 if the server is configured not to allow to change
+this parameter (may depend on the current authentication status).
+
+The settings, if successful, will apply to all future connections.
+They will typically not affect existing connections, unless specified
+otherwise. For this reason, this command should be available only
+to authenticated and trusted users.
+
+If the option name is "language", the command will attempt to
+switch the default language. The same goes for "voice".
+
+The standardization status of this command is still unclear.  It is definitely
+reasonable to use compatible option names between server implementations
+where applicable, but the set of useful configuration parameters
+seems to be impossible to specify in advance.
+Any comment on this issue is welcome.
+
+<sect2> <tt> setl </tt>
+<p>
+
+Set a server configuration parameter. The parameter is a whitespace-separated
+"option value" pair. The server may ignore this command altogether
+with an error code 442. In any case, this setting should never
+alter the execution environment of existing and/or future sessions.
+(In Epos, setting a static option using <tt/setl/, which is rarely
+allowed and even less often actually done, affects all connections
+in the same way; but all voice, language and global options
+fully follow this standard.)
+The server will reply with an error code 412 if the value assigned
+is illegal, or with 451 if the server is configured not to allow
+to change this parameter (may depend on the current authentication status).
+
+The settings apply to the current session; use <tt/setg/ for more
+permanent settings.  Note also that setting some options can have
+arbitrary side-effects.
+
+If the option name is "language", the command will attempt to
+switch the language. The same goes for "voice".
+
+The standardization status of this command is still unclear.  It is definitely
+reasonable to use compatible option names between server implementations
+where applicable, but the set of useful configuration parameters
+seems to be impossible to specify in advance.
+Any comment on this issue is welcome.
+
+<sect2> <tt> show </tt>
+<p>
+
+Show a configuration parameter value. The parameter is an option
+name. The server may reply with the value of the option requested,
+preceded by a single space character, or it may ignore this command
+with error code 442.
+
+<tt/show languages/ and <tt/show voices/ may be used for listing
+available languages, as well as available voices for the current
+language.  The language or voice names are given on separate lines
+each.
+
+<sect2> <tt> strm </tt> <label id="strm-cmd">
+<p>
+
+Prepare a data flow stream. The parameter is a colon-separated sequence
+of data processing modules; commands such as <tt/appl/ cause specified
+data to be run through the modules from left to right.
+Any two adjacent modules must be compatible, that is the type of output 
+produced by the one to the left must match the type of input processed by the
+one to the right. The leftmost module must designate a source (input) module
+for the whole stream, the rightmost one must designate a destination
+for the data produced by the stream. Information on specific data formats
+accepted or produced by the modules can be found <ref id="formats"
+name="above">.
+
+The stream is not automatically active. It processes data only when requested
+by the <ref id="appl-cmd" name = "appl"> command.
+
+The stream lasts until the next strm command or termination of
+the TTSCP connection, then it is deleted.
+
+<sect2> <tt> user </tt>
+<p>
+
+The <tt/user/ command is still not implemented properly and
+its semantics may change.  Epos is currently configured
+not to need and not to use it.  The tentative theory of
+TTSCP authentication goes as follows:
+
+The <tt/user/ command should precede all TTSCP exchanges. Its parameter is "anonymous"
+or a local or configured user account name. Some other user names
+may acquire special meaning. We'll see.
+
+Unless the account requires no authentication, this command
+should be immediately followed by a proper pass command;
+otherwise the session may be refused to issue most or all
+other commands.
+
+If no <tt/user/ command is issued, "user anonymous" is assumed.
+
+If the user doesn't exist, anonymous access is granted.
+
+
+<sect1> TTSCP Modules
+
+<sect2> Input and Output Modules
+<p>
+
+The input and output modules follow the same syntax conventions.
+If the module name begins with a <tt/&dollar;/, the rest of the name
+is a data connection handle. If it begins with a slash, it is
+an absolute file name.  Such absolute file names however form a name
+space distinct from that of the underlying operating system.  In Epos, the
+name space is a single directory defined by the <ref id="pseudorootdir-option"
+name="<tt/pseudo_root_dir/">
+option.  It must be impossible to escape from such name space by inserting
+parent directory references in a file name or otherwise.  A TTSCP
+implementation can decide to reject some or all file input and output modules
+with a 454 reply.
+
+If the module name begins with a <tt/&num;/, the rest of the name is a special
+input/output module identifier.  The only identifier generally supported is
+<tt/localsound/, which can only be used as an output module with the <tt/waveform/
+type.  Any waveform passed to this module should be played over using the
+local soundcard.  The <tt/453/ or <tt/445/ reply may be issued if the
+user is not allowed to use the soundcard, or no local soundcard exists,
+respectively.
+
+The output data type of an input module and the input data type of an output
+module are determined by the respective adjacent modules. If input and
+output modules are directly connected, it is assumed that the data is
+a plain text.
+
+The TSR data type can not be sent or received, and may thus be totally
+implementation and architecture dependent.
+
+
+
+<sect2> Processing Modules
+<p>
+
+At the moment there are only few modules implemented that do a real 
+processing. All of them have fixed names and types.
+
+<table loc="ht">
+<tabular ca="|l|l|l|l|">
+<hline>
+ name	  | input format | output format | notes@
+<hline>
+ chunk	  | plain text	| plain text		| splits text @
+ join	  | plain text	| plain text		| joins texts @
+ raw	  | plain text	| TSR			| parses text @
+ stml	  | STML text	| TSR			| parses STML @
+ rules	  | TSR		| TSR			| apply rules @
+ print	  | TSR		| plain text		| @
+ dump	  | TSR		| SSIF			| extract SSIF @
+ diphs	  | TSR		| segments		| extract segments @
+ syn	  | SSIF	| waveform		| speech synthesis @
+ synth	  | segments	| waveform		| speech synthesis @
+<hline>
+</tabular>
+<caption> Available processing modules </caption>
+</table>
+
+<sect3> <tt> chunk </tt> <label id="chunk-mod">
+<p>
+
+The text is split into parts convenient for latter processing.
+These parts usually correspond at least to whole utterances;
+it is correct not to split the text at all, but care must be
+taken not to cause a split which significantly alters the
+final rendering of the text.
+
+<sect3> <tt> join </tt> <label id="join-mod">
+<p>
+
+It is customary to use the <tt/join/ module just after a <tt/chunk/ module.
+If this module receives two consecutive texts such that the <tt/chunk/
+module would not split their concatenation between them, the <tt/join/ module
+may merge them to a single text, that is, it may silently drop the first
+subtask and prepend the text to the text acquired later.  This delay
+may cross the boundary of an <tt/appl/ command.
+
+<sect3> <tt> raw </tt> 
+<p>
+
+The input text is converted in a language dependent way to the TSR,
+assuming it is a plain text without any specific TTS escape sequences
+or other special formatting conventions.  Except for tokenization
+and whitespace reduction the conversion should not try to process
+the text, especially not in a language dependent way; this goal
+doesn't seem to be always feasible.
+
+<sect3> <tt> rules </tt> 
+<p>
+
+The voice dependent TTS or other rules are applied to a TSR.
+
+<sect3> <tt> print </tt> 
+<p>
+
+The TSR is converted to a plain text representation, suitable as a 
+user-readable output.  The conversion should be as straightforward
+as possible and should not emit any special formatting character
+sequences.  Ideally, the successive application of the <tt/raw/ and
+<tt/print/ modules should not significantly alter the text.
+
+<sect3> <tt> dump </tt> 
+<p>
+
+...
+
+<sect3> <tt> diphs </tt> 
+<p>
+
+This module extracts the segment layer from the input TSR into
+the linear segment stream format; the rest of TSR is discarded.
+
+There may be an implementation-dependent limit on the size
+of the segment stream produced.  If more segments should be produced,
+the module may emit more subtasks; see the <ref id="appl-cmd" 
+name="appl"> command for discussion concerning subtask reporting.
+t
+
+<sect3> <tt> synth </tt> 
+<p>
+
+The input segment stream is synthesized in a voice dependent way.
+
+
+
+
+<sect2> Explicit Data Type Specifiers
+<p>
+
+Sometimes an ambiguity concerning the type of data passed at a certain point
+within the stream may occur.  This is currently the case with streams consisting
+of input and output modules only (such as a stream to play out an audio icon
+from a waveform file to a sound card device); in the future, ambiguously
+typed versatile processing modules may be introduced, too.  Sometimes the
+data type is semantically irrelevant (for example, a socket-to-socket
+forwarding stream), sometimes the default data type, that is, a plain text,
+is a reasonable choice.  There are however instances where the type matters,
+like copying a waveform file to a sound card device: the waveform header
+must be stripped off and the appropriate <tt/ioctl/s must be issued to
+replay the raw waveform data with the appropriate sampling frequency, sample
+size and so on.
+
+The data types can be expressed explicitly by inserting a pseudo-module
+into the stream at the ambiguous position.  Failing that, the output data
+type of the preceding module and/or the input data type decides the data
+type at this point. Failing even that, the server will assume plain text
+data.
+
+The pseudo-module name consists of a single letter enclosed in square
+brackets.  The available data types are indicated by letters listed in
+<ref id="typespecs" name="the table of explicit data type specifiers">.
+
+<table loc="ht">
+<tabular ca="|l|l">
+<hline>
+<label id="typespecs">
+ name	       | data format @
+<hline>
+ t | plain text  @
+ s | STML text  @
+ i | the server-internal text structure representation @
+ p | SSIF @
+ d | segments @
+ w | waveform @
+<hline>
+</tabular>
+<caption> Explicit data type specifiers </caption>
+</table>
+
+The data formats are described in <ref id="formats"
+name="the data formats subsection">.
+
+
+
+
+
+<sect1>Response Codes
+<p>
+
+Any server <em/reply/ contains a numeric code, a single space, and some
+arbitrary newline-terminated text. The numeric code (three decimal
+digits) allows interfacing with simple to trivial clients, whereas
+the text (which is optional) is meant for possible user interaction.
+
+The <em/response codes/ are defined by the protocol, while the accompanying
+text is not, but it should rarely exceed 20 characters (clients
+should tolerate at least 76 characters plus the response code).
+
+Every response code consists of the <em/response class/, <em/the subclass/
+and an extra digit. The response class drives the protocol states
+and reports errors. The subclass is interpreted depending on the
+response class; it can specify which component has reported
+an error or generated this particular response. Trivial clients
+may ignore this digit altogether. The third digit is merely used
+for distinguishing between messages of the same class and subclass
+and most clients are likely to ignore it in most situations.
+
+<sect2>Response Classes
+<p>
+Within TTSCP, nine response classes have been defined.
+Out of these, one is used for in-progress communication,
+four indicate the results of commands, and the remaining
+four are reserved for future extensions.
+
+<table loc="ht">
+<tabular ca = "|l|l|l|">
+<hline>
+code | error type | suggested action @
+<hline>
+0xx | reserved  | (server queries client?) @
+1xx | still OK | informative only @
+2xx | OK, command completed | transmit another command @
+3xx | reserved | notify user / ignore @
+4xx | command failed | transmit another command @
+5xx | reserved | notify user @
+6xx | connection terminated | notify user if unexpected @
+7xx | reserved  | notify user @
+8xx | server crash or shutdown | notify user @
+<hline>
+</tabular>
+<caption>
+	TTSCP response classes
+</caption>
+</table>
+
+The client is expected to send another command whenever it receives
+a 2xx or a 4xx response, not to send otherwise. The client should
+treat the connection as terminated, whenever it receives any response
+with code 5xx or higher. It may also quit at any time just after
+sending a "done" command to the server; the server will however
+confirm that command with a reply of 600 before disconnecting.
+
+Replies of 8xx except 80x are reserved for cases of severe server
+misconfiguration, or detected programming bugs. Their meanings
+are very implementation dependent (implementations are encouraged
+not to issue them except in emergency). If such a reply is ever
+received, the server has abnormally terminated.
+
+The messages accompanying 3xx and higher response codes are likely
+to be interesting to the user if there is one. Any message without an error
+code is a data flow primarily meant for the user if any; a sequence
+of these may occur only after some 1xx response, except for debugging
+messages if on.
+
+At the moment, some error codes contain letters. Later, all of
+them will consist of digits only and will be space-terminated.
+
+<sect2> Response Subclasses
+<p>
+
+The subclass depends on the response class. The most interesting
+classes are 3xx and 4xx, i.e. errors, where the subclass indicates
+both the nature of the problem, and the suggested way of dealing
+with it (especially in the case of 4xx responses).
+The same meaning is attached to these subclasses also in case
+of 6xx and 8xx responses.
+
+The middle digit of 1xx and 2xx responses has still no meaning
+attached (there are only a few such responses).
+
+<table loc="ht">
+<tabular ca="|l|l|l|">
+<hline>
+code      | error type      | suggested action@
+<hline>
+0         | none            | relax; assume user-initiated interruption@
+1         | syntax          | notify user@
+2         | busy or timing  | wait and retry@
+3         | bad data        | notify user@
+4         | not found       | notify user@
+5         | access denied   | notify user@
+6         | server error    | have user notify server author@
+7         | network error   | wait and retry@
+<hline>
+</tabular>
+<caption>
+	TTSCP error subclasses
+</caption>
+</table>
+
+<sect2> Currently Defined Messages
+<p>
+
+<table loc="htp">
+<tabular ca="|l|l|">
+<hline>
+111	| daemon talks@
+112	| apply task started@
+122	| apply task total bytes count follows@
+123	| apply task chunk bytes count follows@
+141	| option value follows@
+142	| data connection handle follows@
+<hline>
+200	| daemon is happy and ready@
+211	| access granted@
+212	| anonymous access granted@
+<hline>
+</tabular>
+<caption>
+	TTSCP success codes as issued by Epos
+</caption>
+</table>
+
+<table loc="hptb">
+<tabular ca="|l|l|">
+<hline>
+401	| intr command received@
+411	| command not recognized@
+412	| option passed illegal value@
+413	| command too long, ignored@
+414	| parameter should be a positive integer@
+415	| no or bad stream@
+416	| no parameter allowed@
+417	| parameter missing@
+418	| bad format or encoding@
+421	| output voice busy@
+422	| out of memory@
+423	| nothing to interrupt@
+431	| unknown character in text@
+432	| received bad segments@
+435	| received bad waveform (unused)@
+436	| data connection disconnected@
+437	| permanent read error@
+438	| end of file@
+439	| hw cannot handle this waveform@
+441	| help not available@
+442	| no such option@
+443	| no such language or voice@
+444	| invalid connection handle@
+445	| could not open file@
+446	| out of range (never issued)@
+447	| invalid option value@
+448	| cannot send woven pointery@
+451	| not authorized to do this@
+452	| no such user or bad password@
+453	| not allowed to use localsound@
+454	| not allowed to use filesystem input/output modules@
+456	| input too long@
+461	| input triggered server bug@
+462	| unimplemented feature@
+463	| input triggered configuration bug@
+464	| input triggered OS incompatibility@
+465	| i/o problem : error on close()@
+466	| command stuck@
+467	| fatal signal@
+471	| tcpsyn received invalid waveform@
+472	| unresolved remote tcpsyn server@
+473	| unreachable remote tcpsyn server@
+474	| remote tcpsyn server uses an unknown protocol@
+475	| remote tcpsyn server returned error@
+476	| remote tcpsyn server timed out@
+<hline>
+</tabular>
+<caption>
+	TTSCP error codes as issued by Epos
+</caption>
+</table>
+
+The 8xx class of responses (fatal errors) is still very unsettled
+and many of the codes listed there
+will later be removed or merged together. Applications should not try to decode
+them except possibly for the middle digit. The same goes for all x6x subclasses
+of errors (internal errors).
+
+<table loc="htbp">
+<tabular ca="|l|l|">
+<hline>
+600	| session ended normally@
+601	| server reinitializing as requested@
+<hline>
+800	| server shutting down as requested by client@
+801	| error explicitly reported in config files@
+811	| rules or dictionary file syntax@
+812	| generic configuration file syntax@
+813	| impossibilia referenced in config files@
+814	| bad command line@
+841	| cannot open necessary configuration file@
+842	| no voices configured@
+843	| up-to-date configuration files not found@
+844	| no unicode or SAMPA maps found@
+861	| internal error: impossible branch of execution@
+862	| internal error: invariance violation@
+863	| internal error: buffer overflow@
+864	| insufficient capacity@
+865	| server crashed, reason unspecified@
+869	| double fault@
+871	| network unreachable@
+872	| server already running@
+881	| too many syntax errors in rule files@
+882	| infinite include cycle@
+<hline>
+</tabular>
+<caption>
+	TTSCP session termination codes as issued by Epos
+</caption>
+</table>
+

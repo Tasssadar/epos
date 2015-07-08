@@ -1,0 +1,29 @@
+#
+#	(c) Petr Horák <horak@ure.cas.cz>
+#
+# Transkripèní pravidla pro trifonový inventáø od Betty <betty@ure.cas.cz>
+#
+# tøi druhy neutrálních samohlásek (názvy jsou popisné, neodpovídají významu):
+# 
+# V - znìlá neutrální samohláska
+# U - neznìlá neutrální samohláska
+# P - nepøítomná neutrální samohláska
+#
+
+ progress  0>^(pt»k_!$vowel)	  colon       ; neznìlá n.s. po p,t,»,k
+ regress   ^>@(pt»k_v$sonant)     colon       ; znìlá n.s. pøed v a jedineènými souhl.
+
+ progress  0>@(bdïgjlr_!#$vowel)   colon       ; znìlá n.s. po b,d,ï,g,j,l,r
+
+ progress  0>%(cèfs¹xZ®vz¾hNøØ_!$vowel)  colon  ; nepøítomná n.s. po cèfs¹xZ®vz¾hNøØ
+
+ progress  0>@(mnò_!$vowel)       colon       ; znìlá n.s. po m,n,ò
+ regress   @>%(m_pbfv)            colon       ; nepøítomná n.s. po m a pøed p,b,f,v
+ regress   @>%(n_tdcZsz)          colon       ; nepøítomná n.s. po n a pøed tdcZsz
+ regress   @>%(ò_»ïè®¹¾)          colon       ; nepøítomná n.s. po ò a pøed »ïè®¹¾
+
+ regress   0>a(!_A)                      ; o¹etøení diftongù
+ regress   0>o(!_O)                      ; o¹etøení diftongù
+ regress   0>e(!_E)                      ; o¹etøení diftongù
+ regress   0>u(AOE_$consonant)    colon       ; o¹etøení diftongù
+ 

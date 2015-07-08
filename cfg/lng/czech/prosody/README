@@ -1,0 +1,3 @@
+This directory only contains naive prosody rules, which are normally
+not used for Czech.  A much better prosody is defined in the
+files stress.rul and either prosody.rul or lpcpros.rul.

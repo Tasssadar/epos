@@ -1,0 +1,18 @@
+Under Windows, Epos can either use code page 8859-2 or any
+other code page if you supply the converter.  For example,
+if you put the following files, in addition to convert.bat,
+into this directory...
+
+convert.exe
+8859-2.enc
+accent.conv
+cp1250.enc
+
+...the configure.bat script will convert all relevant files
+into code page 1250.  (If this functionality is broken
+or unbelievably underdocumented, complain to the authors.)
+
+Epos itself is completely code page independent, so what these
+scripts should do is only to recode configuration files
+which may contain funny characters.
+

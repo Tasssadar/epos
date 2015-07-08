@@ -1,0 +1,5 @@
+Turn this control connection to a data connection.
+The data connection stays open until it is deleted
+using the delh command, or the control connection
+specified by the parameter to the data command is
+closed.

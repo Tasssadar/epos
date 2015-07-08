@@ -1,0 +1,97 @@
+
+# These rules should eventually convert numbers to their
+# corresponding Czech numerals.
+#
+# This file is full of uglish hacks. Capital X is used
+# for marking the end of the number throughout. We should
+# not use regress and progress rules, as these don't work
+# consistently with zeroes.
+
+regex	/([0-9])\ ([0-9][0-9][0-9])/\1\2/	colon
+
+regex	/^(0*)0/\1nula|/	word
+
+subst	mathsign.dic	colon
+
+regex	/([0-9])x/\1krát|/	colon
+
+regex  /(1)\.([0-9])/\1~celá~\2/   sent
+regex  /(^0)\.([0-9])/nula~celá~\2/  sent
+regex  /([234])\.([0-9])/\1~celé~\2/   sent
+regex  /([05-9])\.([0-9])/\1~celých~\2/   sent
+
+regex	/([0-9])([^X0-9])/\1X\2/	colon
+regex	/([0-9])\$/\1X/		colon
+
+regex	/([0-9]\?[0-9][05-9])([0-9]\{9\}X)/\1~miliard~\2/	colon
+regex	/([0-9]\?[0-9]\?)2([0-9]\{9\}X)/\10~dve~miliardy~\2/	colon
+regex	/([0-9]\?[0-9][234])([0-9]\{9\}X)/\1~miliardy~\2/	colon
+regex	/([0-9]\?[0-9][1])([0-9]\{9\}X)/\1~miliarda~\2/	colon
+regex	/(1[0-9])([0-9]\{9\}X)/\1~miliard~\2/	colon
+regex	/^1([0-9]\{9\}X)/miliarda~\1/		colon
+if   colloquial   text
+{
+	regex	/1([0-9]\{9\}X)/~jedna~miliard~\1/	colon
+	regex	/([1-9]\?[0-9][234])([0-9]\{9\}X)/\1~miliard~\2/	colon
+}
+regex	/([2-4])([0-9]\{9\}X)/\1~miliardy~\2/	colon
+regex	/1([0-9]\{9\}X)/~jedna~miliarda~\1/		colon
+regex	/([05-9])([0-9][0-9]\{9\}X)/\1~miliard~\2/	colon
+
+
+
+regex	/000([0-9][0-9][0-9][0-9][0-9][0-9]X)/\1/				colon
+regex	/001([0-9][0-9][0-9][0-9][0-9][0-9]X)/jeden~milión~\1/			colon
+regex	/^1([0-9][0-9][0-9][0-9][0-9][0-9]X)/milión~\1/				colon
+regex	/([0-9]\?[0-9][2-4])([0-9][0-9][0-9][0-9][0-9][0-9]X)/\1~milióny~\2/	colon
+regex	/([0-9]\?[0-9][15-9])([0-9][0-9][0-9][0-9][0-9][0-9]X)/\1~miliónov~\2/	colon
+regex	/(1[0-9])([0-9][0-9][0-9][0-9][0-9][0-9]X)/\1~miliónov~\2/		colon
+if   colloquial   text
+{
+	regex	/1([0-9][0-9][0-9][0-9][0-9][0-9]X)/~jedna~miliónov~\1/	colon
+	regex	/([1-9]\?[0-9][234])([0-9][0-9][0-9][0-9][0-9][0-9]X)/\1~miliónov~\2/	colon
+}
+regex	/([2-4])([0-9][0-9][0-9][0-9][0-9][0-9]X)/\1~milióny~\2/	colon
+regex	/1([0-9][0-9][0-9][0-9][0-9][0-9]X)/~jeden~milión~\1/		colon
+regex	/([05-9])([0-9][0-9][0-9][0-9][0-9][0-9]X)/\1~miliónov~\2/	colon
+
+
+regex	/([1-9][0-9][015-9])([0-9][0-9][0-9]X)/\1~tisíc~\2/	colon
+regex	/000([0-9][0-9][0-9]X)/\1/				colon
+regex	/(0\?[0-9][015-9])([0-9][0-9][0-9]X)/\1~tisíc~\2/	colon
+
+regex	/^1([0-9][0-9][0-9]X)/~tisíc~\1/			colon
+
+if   colloquial   text
+{
+	regex	/1([0-9][0-9][0-9]X)/~jedna~tisíc~\1/		colon
+	regex	/([1-9]\?[0-9][234])([0-9][0-9][0-9]X)/\1~tisíc~\2/	colon
+}
+regex	/([0-9]\?[1][234])([0-9][0-9][0-9]X)/\1~tisíc~\2/	colon
+regex	/([1-9]\?[02-9]\?[234])([0-9][0-9][0-9]X)/\1~tisíc~\2/	colon
+
+
+regex	/(1[2-4])([0-9][0-9][0-9]X)/\1~tisíc~\2/	colon
+regex	/([2-4])([0-9][0-9][0-9]X)/\1~tisíc~\2/	colon
+regex	/([15-9])([0-9][0-9][0-9]X)/\1~tisíc~\2/	colon
+
+regex	/([^0-9])0([0-9]*)/\1\2/ colon
+
+regex	/1([0-9][0-9])/~sto~\1/		colon
+regex	/2([0-9][0-9])/~dve~sto~\1/	colon
+regex	/([34])([0-9][0-9])/\1~sto~\2/	colon
+regex	/([5-9])([0-9][0-9])/\1|sto~\2/	colon
+
+regex	/([2-9])([1-9])/\10~\2/	colon
+
+regex	/X//
+
+if   colloquial   text
+{
+	regex	/11/~jedenás»/	colon
+	regex	/1/~jedna/	colon
+}
+
+subst  basenum.dic
+regex   /0//
+

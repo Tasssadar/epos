@@ -1,0 +1,122 @@
+#
+#	(c) Jirka Hanika <geo@ff.cuni.cz>
+#       (c) Martin Petriska <petriska@pobox.sk>
+
+$voiced    = bdïgZ®z¾hv
+$voiceless = pt»kcès¹xf
+$fric      = sz¹¾fvhx
+$afric     = cZè®
+$stop      = pbt»dïkg
+$nasal     = mnòN
+$sonant    = jlr$nasal
+$short     = aeiouyäì
+$long      = áéíóúýäì
+$diphthong  = AEUOô
+$vowel     = $short$long$diphthong
+$consonant=$voiced$voiceless$sonant
+$everywhere= !_!
+$numbers   = 1234567890
+$sonority  = 0'<$fric$afric${stop}<$nasal<l<rj<àå$vowel   ;l<r viz "umrlec" etc. Ani systematické, ani bezpeèné.
+
+$lower_case = aáäbcèdïeéìfghiíjklµåmnòoóôpqràs¹t»uúvwxyýz¾
+$upper_case = AÁÄBCÈDÏEÉÌFGHIÍJKL¥ÅMNÒOÓÔPQRÀS©T«UÚVWXYÝZ®
+
+# Pravidla pro ètení zkratek apod.: velké písmeno na jiném,
+#   ne¾ prvním místì ve slovì indikuje zkratku a hláskuje se.
+#   Stejnì tak jednotlivé písmeno pøed cifrou nebo speciálním znakem.
+subst skratky.dic
+regress	 ${lower_case}>${upper_case}(0_!${lower_case})			colon
+regress  ${upper_case}>${lower_case}(0_${lower_case})			word
+regress  ${upper_case}>${lower_case}(0_${lower_case})			colon
+subst	 abbrevs.dic							colon
+regress  ${upper_case}>${lower_case}($everywhere)			colon
+
+
+#include "numerals.rul"
+
+ subst	   main.dic		   ;Rôzne výnimky
+
+
+ progress  0>s(x_!)
+ progress  u0>0v(q_!)              ; Rozlo¾enie x,q na ks, kv
+ regress   xq>k($everywhere)
+ regress   h>x(c_!)                ; Spøe¾ka ch > x
+ regress   z¾>Z®(d_!)              ; Spøe¾ky dz,d¾ > Z,® 
+ progress  cd>0(!_xZ®)
+ 
+
+ regress 0>o(ô_!)
+ regress ô>u($everywhere)          ;ô zatial nahradené spojením uo
+ progress  w>v($everywhere)       
+ 
+ regress v>ô($vowel_!$vowel)	   ; §74 Kral, fonema W zatial neexistuje	
+ regress ô>u($everywhere)          ; takze je nahradena u
+
+ progress ä>e($everywhere)         ; nahrada ä za e
+
+
+# Následující pravidla jednak zmìní vìty vydìlené dvojteèkou
+#   na vìty vydìlené teèkou (to je spí¹e ¹patnì ne¾ dobøe),
+#   dále pak oznaèí dvojteèkou (místo otazníku) ty vìty, které
+#   obsahovaly ve své první klausi nìkteré ze slov uvedených
+#   ve slovníku wh.dic, nemìly tuto klausi zvlá¹» vydìlenou
+#   ¾ádnou interpunkcí, a byly samy vydìleny otazníkem.
+#
+# Fonetik vidí, ¾e jsem právì "definoval" doplòovací otázky.
+
+ progress  :>.($everywhere)	text	sent
+ subst     wh.dic				; Doplòovací otázky
+ raise     Q:_			colon	phone
+ progress  Q>_(!0_!)		sent	colon	;  jen v první klausi
+ raise     Q:?			sent	colon
+ progress  Q>0($everywhere)			;  úklid v¹ech úrovní
+ progress  Q>_($everywhere)	sent	colon
+ progress  Q>:($everywhere)	text	sent
+
+ 
+
+ subst     syll.dic		; Rozsadit vokály
+ 
+ regress   0>'(0_$vowel)	; Rázy
+
+ 
+
+
+ prep	nonsyl.dic		syll
+
+
+
+
+
+
+ regress   dtnl>ï»òµ(!_íie)
+  
+ progress  yýì>iíe($everywhere)
+
+ regress   z>q(t_!)		   ; tz -> c Hertz	
+ progress t>0(!_q)
+ regress q>c($everywhere)
+ 
+ regress t>0(s_s)                 ;mestsky -> mesky
+ regress s>0(s_!)
+ 
+ regress s>q(Zdt_k)                  ; Zsk,tsk,dsk -> ck 	
+ progress Zdt>0(!_q)                 ; § 246
+ regress q>c($everywhere)
+
+ regress s>q(»tïd_t)		   ; »st,ïst,dst,tst-> ct
+ progress »tïd>0(!_q)
+ regress q>c($everywhere)
+  
+ regress »>0(!_ï)		  ; »ï->ï devä»desiat
+
+# regress   $voiced>${voiceless}(!_$voiceless&0')       	; Asimilace znìlosti
+ regress   $voiced>${voiceless}(!_$voiceless&0')  colon     	; Asimilace znìlosti
+
+ regress   $voiceless>$voiced(!_$voiced!v)       colon
+
+
+ 
+# progress  n>N(!_kg)
+
+ syll      $sonority	syll	; Rozklad_na_slabiky

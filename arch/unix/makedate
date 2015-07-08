@@ -1,0 +1,9 @@
+#!/usr/bin/perl
+
+%m = ("Jan", "January", "Feb", "February", "Mar", "March", "Apr",
+"April", "Jun", "June", "Jul", "July", "Aug", "August", "Sep",
+"September", "Oct", "October", "Nov", "November", "Dec", "December");
+
+$date = scalar localtime ( (stat("../configure.in"))[9]);
+(undef, $month, $day, undef, $year) = split / +/,$date;
+print $day, " ", $m{$month}, " ", $year, "\n";

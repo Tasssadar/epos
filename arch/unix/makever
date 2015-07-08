@@ -1,0 +1,20 @@
+#!/bin/sh
+
+if [ -f ../src/common.h ]; then
+	commo=`( cat ../src/common.h|grep '^#define VERSION'|awk -F\" '{print $2}' )`
+	chan=`( cat ../doc/Changes|grep '^[0-9]'|tail -n 1|awk '{print $1}' )`
+	datechanges=`( cat ../doc/Changes|grep '^[0-9]'|tail -n 1|awk '{print $4}' )`
+	if [ x$datechanges = x ]; then
+		echo No release date specified! >&2
+	fi
+	if [ $commo != $chan ] ; then
+		echo Hey! This is said to be version $commo, but doc/Changes seems to imply $chan ! >&2
+	fi
+	if [ x$1 = xdos ]; then
+		echo $commo |tr . -
+	else
+		echo $commo
+	fi
+else
+	(cd ..; ../arch/unix/makever)
+fi

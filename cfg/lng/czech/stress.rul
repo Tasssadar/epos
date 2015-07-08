@@ -1,0 +1,113 @@
+#
+#  Následující odstavec peèuje o to, aby døíve oznaèené
+#  krátké tvary zájmenné byly zapojeny do øetìzù monosylab
+#  pøi pozdìj¹ím skládání taktù, ale jiná koncová
+#  monosylaba nikoli. Dìje se tak je¹tì pøed transkripcí
+#  zejména proto, abychom poznali  "mì" vs. "mnì".
+#
+
+regress  ~_\ >f(!_0)	colon  word
+
+inside !~
+{
+	regress  f>\ (!_!)   word  word
+}
+
+regress  ~>\ (!_!)	colon  word
+
+#
+#  Nyní si oznaèíme mono-, di-, tri-, tetra-, polysyllaba.
+#  Dìje se tak jen v taktech ukonèených mezerou (ta je
+#  zvýraznìna pøedcházejícím zvráceným lomítkem),
+#  tedy nikoli v koncových taktech. Viz té¾ minulý komentáø.
+#
+
+<   word   syll
+	regress   \ >m(!_!)   word  word
+	regress   \ >d(!_!)   word  word
+	regress   \ >t(!_!)   word  word
+	regress   \ >q(!_!)   word  word
+	regress   \ >p(!_!)   word  word
+>
+
+#
+#  Monosylaba se v urèitých pozicích oznaèí jako pøízvuèná ("x")
+#  a vzápìtí jsou ve v¹ech ostatních pozicích, kde zùstala oznaèena
+#  jako "m", pøilepena ke svému levému sousedu. Poèáteèní støí¹ka
+#  znamená zaèátek úseku.
+#
+#  (V pravidlech 4.6 sub f nesouhlasil pøíklad s formulacemi pravidel.)
+#
+#  Je dùle¾ité, ¾e u pravidel, která pracují se seznamem øetìzcù,
+#  jako je napøíklad následující, nezále¾í na poøadí polo¾ek v seznamu.
+#  Jde-li o pravidlo substituèní, provádìjí se substituce (pøednostnì
+#  del¹í a v pravé èásti zpracovávaného textu, je-li pochybnost)
+#  opakovanì tak dlouho, dokud se text neustálí, nebo dokud program
+#  neztratí trpìlivost (s vìènì zacykleným pravidlem).
+#
+#  Nakonec se zamete (v¹echny doèasné znaèky se sma¾ou). Pøi té¾e
+#  pøíle¾itosti zanikne znaèka \X, která pøípadnì blokovala zapojení
+#  taktu do tohoto pøilepování.
+#
+
+subst	"^mmmmm,mmmxm  ^mmmmmm,mmmxmm  ^mmmmmmm,mmmmxmm  \
+         pmm,pxm  qmmm,qxmm  pmmm,pxmm  tmmmm,tmmxm  qmmmm,qxmxm  pmmmm,pxmmm \
+         dmmmmm,dmmxmm  tmmmmm,tmmxmm  qmmmmm,qxmxmm  pmmmmm,pxmmxm  \
+         dmmmmmm,dmmxmmm  tmmmmmm,tmmxmmm  qmmmmmm,qxmmxmm  pmmmmmm,pxmmxmm  \
+         dmmmmmmm,dmmxmmxm  tmmmmmmm,tmmxmmxm  qmmmmmmm,qxmmmxmm  pmmmmmmm,pxmmmxmm  \
+         mmmmmmmm,mmmmxmmm"                                        colon  word
+
+postp	"m"		  word  word
+
+regress  mdtqpxf\X>\ (!_!)   word  word
+
+#
+# zkracování isolovaných a ostatních taktù podle poètu slabik - ipcz
+#
+
+regress  _\ >I(0_0)	sent   word	; isolated words
+inside   I
+{
+	<   word   syll
+		contour  t/+33	word word
+		contour  t/+0	word word
+		contour  t/-15	word word
+		contour  t/-25	word word
+		contour  t/-31	word word
+		contour  t/-33	word word
+	>
+}
+inside   !I
+{
+	<   word   syll
+		contour  t/+8	word word
+		contour  t/+0	word word
+		contour  t/-5	word word
+		contour  t/-8	word word
+		contour  t/-10	word word
+	>
+}
+regress  I>_(!_!)	sent   word
+
+#
+#  Právì jsme pøestali "I" pou¾ívat k oznaèení isolovaných
+#  taktù a zaèneme ho pou¾ívat k oznaèení taktù iniciálních.
+#
+
+regress	 _\ F>M(!_!)	colon	word
+regress	 M>I(0_!)	colon	word
+
+#
+#  Rozdìlíme M na A a B podle toho, zda budeme chtít
+#  kadenci klesavou nebo stoupavou. Oznaèování se dìje
+#  zleva:  IMMMMMF -> IBMMMMF -> IBAMMMF -> IBACMMF ->
+#  -> IBACBMF -> IBACBAF  a pak dal¹ími pravidly -> IBABBBF
+#
+
+subst   "IM,IB  BM,BA  AM,AC  CM,CB"	colon  word
+regress  C>B(!_!)			colon  word
+
+regress  IAB>F(!_0)	colon	word	; a,b: F (kA, kB)
+regress  A>B(!_F)			colon  word
+# regress  IAB>aab(!_ab)	colon	word	; O,P: F-1 (kA, kB)	; ??
+regress  F>T(!_0)	sent	word

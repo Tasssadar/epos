@@ -1,0 +1,140 @@
+
+We just started (spring 2005) providing this FAQ as a supplementary
+resource.  If you have a question you haven't found an answer to
+here, or any other comment on the FAQ, please send it to
+the authors (epos@speech.cz).
+
+If the question is of technical nature, consider subscribing
+to the Epos developer list at epos-dev@speech.cz and sending
+the question there.  The list language is English.
+
+
+You don't have to provide the answer, but you can.
+
+
+
+Q: What character encoding does Epos expect for text inputs ?
+A:
+Any number of eight-character encodings simultaneously.
+Just download the desired unicode mapping file from
+the Unicode consortium and put it into cfg/mappings.
+Epos will merge equivalent characters, ignore all characters
+which are not assigned any meaning in the configuration
+files or rules, and merge the rest into a single internal
+8-bit encoding.  Epos will even load additional conversion
+tables if a TTSCP connection requests a hereto unused encoding,
+and additional characters can be allocated on the fly.  Even this
+latter feature may be useful in some rare scenarios, although
+normally loading additional conversion tables from TTSCP is
+employed just for heterogenous integration.  For example,
+the client may run on a different operating system than the
+server, and the two operating systems's natural encodings for
+a given language may differ.
+
+Epos does not accept multibyte character input
+such as UTF-8 as yet.
+
+
+
+Q: How do I write my own TTSCP client to do custom processing?
+A:
+Take <tt>say-epos.cc</tt> as your starting point.  If there are unclear points,
+refer to doc/ttscp.sgml (there are make targets there to convert
+the documentation to your preferred format).  If the unclear points
+persist, please report this as a bug in the TTSCP specification.
+
+
+
+Q: How much processing does Epos do before actually starting
+to write the waveform to a soundcard?
+A:
+Roughly speaking, every TTS processor works in several logical stages:
+
+0. text input
+1. utterance chunking
+2. preprocessing
+3. phonetic transcription
+4. prosody modelling
+5. speech synthesis
+6. speech output
+
+With Epos, all these stages are performed sequentially,
+and the utterance chunking stage is optional.
+
+That is, all of the input is read into Epos; it is then
+split to utterances (sentences); from this point on,
+every utterance is processed separately, taking
+steps 2 to 6 one by one, possibly in parallel with the
+processing of following or unrelated utterances. Therefore,
+Epos never speaks out before it has fully processed at least
+one sentence of the input text.  It will even process all
+of the input text first, unless utterance chunking is enabled
+(by including a TTSCP "chunk" module in the processing stream,
+note the -u option to the example client).
+
+A limiting factor is step 4, where no current TTS system can
+process less than a sentence of text and still have natural prosody.
+Some however do have better streaming capabilities, outputting the
+speech while it is being sythesized (steps 5 a 6 merged).
+This is possible to implement for Epos, too, but as yet the delay
+introduced is considered negligible.  (If we do implement this, we
+would no longer be able to send fully compliant RIFF headers
+over TTSCP, as the length fields remain unknown until the end
+of the synthesis step.  That would put additional burden on the clients.)
+
+
+
+Q: Will you accept my patch for feature XXXXX and architecture YYYYY?
+A:
+Yes, as long as it is consistent with Epos.  Consistent roughly means:
+compatible licensing, no copy-and-paste stuff, no adverse effects on people
+who don't use feature XXXXX nor architecture YYYYY, the same coding
+style as in the rest of Epos (see doc/CodingStyle in the Linux Kernel source
+for details and some rationale, as far as the C subset of C++ is concerned).
+
+
+
+Q: (followup) How can I avoid copy-and-paste?  And why should I?
+A:
+We insist of having every idea at (at most) one point in the source.
+The reason is maintainability.  If you are tempted to copy and
+edit a block of code, please try to pack it into a new function,
+sufficiently general to accommodate both the original functionality
+and the one which you seek, and just call it from both places.
+You may justly think that this makes the resulting code harder
+to read and understand correctly, but the point is that this actually
+makes it (almost) impossible to understand incorrectly and modify
+inconsistently.  The latter concern is what counts, unless you are
+preparing the last patch to Epos forever.
+
+
+
+Q: I found a bug, but I'm no programmer.  How can I get it fixed fast?
+A:
+Best bug reports get fastest response.  A very good way to report errors
+is to construct a test case which demonstrates the error in the Vogon
+language.  This is done by editing cfg/lng/vogon/vogon.rul and
+src/tests/vogon_test.cc.
+
+Adjust the rules in vogon.rul so that all existing tests continue to
+succeed, while you can demonstrate the bug with (note the -x!)
+say-epos -x --language vogon   "INPUT TEXT"
+by either crashing Epos or receiving a different response than the
+documentation suggests.  Then add the INPUT TEXT and the correct output
+into vogon_test.cc.  Because of the bug, this will make the tests
+(to be run with "make check") fail.  Send us a diff (or, the files
+you've changed).
+
+This procedure not only makes it perfectly clear how to reproduce the bug,
+but it will also (almost) prevent it from reappearing after we fix it.
+
+
+
+Q: I'm a MS Windows user and I don't know how to download, install
+and operate a C++ compiler.  Is there a precompiled Win32 binary of Epos?
+A:
+You can try this link:
+http://epos.ure.cas.cz/download/bin/win32/epos2.4.79.exe 
+to download a less recent, but pretty stable binary version of Epos.
+
+

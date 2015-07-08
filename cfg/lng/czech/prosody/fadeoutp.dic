@@ -1,0 +1,11 @@
+#i/1last:*  -20
+i/1last:*   -6
+i/2last:*   -2
+
+#t/1last:*  +20
+#t/2last:*  +10
+t/1last:*   +7
+t/2last:*   +2
+
+f/1last:*  -20
+

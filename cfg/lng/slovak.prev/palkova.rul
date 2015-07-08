@@ -1,0 +1,437 @@
+#
+#	prosodická pravidla Fonetického ústavu FF UK pro èe¹tinu, 1998
+#
+#	(c) 1998  Zdena Palková
+#	(c) 1998  Jiøí Hanika
+#
+#	(See doc/COPYING for info on copying and modifying this file.)
+#
+#
+#	pokud tu tento øádek není jen zapomenut, jde o versi 2.2.?
+#
+
+
+#$base_dir	external
+#$prosody_dir	= external
+#$prosody = ${base_dir}/${prosody_dir}
+
+
+# pøidat èárku pøed "a":
+with  "a"  word
+{
+	regress a>\X(!_!)
+}
+raise	\X:!		word	phone
+syll	\X<\ _		colon   word
+regress \X>\ (!_!)	colon	word
+regress \X>a(!_!)
+
+#
+#  Následující odstavec je¹tì pøed transkripcí oznaèuje
+#  koncová monosylaba, která podléhají pozdìj¹ímu
+#  slévání do taktù. Po transkripci u¾ nelze rozli¹it
+#  "mì" vs. "mnì".
+#
+
+with "mi mì se si ho mu ti tì"
+{
+	regress  _\ >~(!_!)   word  word
+}
+
+#
+#  Zde se provádìjí transkripèní pravidla ze souboru
+#  trans.rul; "#include" není jen komentáø!
+#
+
+#include "trans.rul"
+
+#
+#  Následující pravidla o¹etøují tøi teèky a pomlèku.
+#
+
+inside	\~	sent
+{
+   6x	regress  0>\#(!_0)	sent	; vlo¾ení pausy po tøech teèkách
+}
+regress  \~>.(!_!)	sent	sent
+regress  ->,(!_!)	sent	colon
+
+
+#
+#  Následující odstavec peèuje o to, aby døíve oznaèené
+#  krátké tvary zájmenné byly zapojeny do øetìzù monosylab
+#  pøi pozdìj¹ím skládání taktù, ale jiná koncová
+#  monosylaba nikoli. Dìje se tak je¹tì pøed transkripcí
+#  zejména proto, abychom poznali  "mì" vs. "mnì".
+#
+
+regress  ~_\ >f(!_0)	colon  word
+
+inside !~
+{
+	regress  f>\ (!_!)   word  word
+}
+
+regress  ~>\ (!_!)	colon  word
+
+#
+#  Nyní si oznaèíme mono-, di-, tri-, tetra-, polysyllaba.
+#  Dìje se tak jen v taktech ukonèených mezerou (ta je
+#  zvýraznìna pøedcházejícím zvráceným lomítkem),
+#  tedy nikoli v koncových taktech. Viz té¾ minulý komentáø.
+#
+
+<   word   syll
+	regress   \ >m(!_!)   word  word
+	regress   \ >d(!_!)   word  word
+	regress   \ >t(!_!)   word  word
+	regress   \ >q(!_!)   word  word
+	regress   \ >p(!_!)   word  word
+>
+
+#
+#  Monosylaba se v urèitých pozicích oznaèí jako pøízvuèná ("x")
+#  a vzápìtí jsou ve v¹ech ostatních pozicích, kde zùstala oznaèena
+#  jako "m", pøilepena ke svému levému sousedu. Poèáteèní støí¹ka
+#  znamená zaèátek úseku.
+#
+#  (V pravidlech 4.6 sub f nesouhlasí pøíklad s formulacemi pravidel.
+#   Doporuèuji zkontrolovat.)...
+#
+#  Je dùle¾ité, ¾e u pravidel, která pracují se seznamem øetìzcù,
+#  jako je napøíklad následující, nezále¾í na poøadí polo¾ek v seznamu.
+#  Jde-li o pravidlo substituèní, provádìjí se substituce (pøednostnì
+#  v pravé èásti zpracovávaného textu a del¹í, je-li pochybnost)
+#  opakovanì tak dlouho, dokud se text neustálí, nebo dokud program
+#  neztratí trpìlivost (s vìènì zacykleným pravidlem).
+#
+#  Nakonec se zamete (v¹echny doèasné znaèky se sma¾ou).
+#
+
+subst	"^mmmmm,mmmxm  ^mmmmmm,mmmxmm  ^mmmmmmm,mmmmxmm"	colon  word
+
+subst   "pmm,pxm  qmmm,qxmm  pmmm,pxmm  tmmmm,tmmxm  qmmmm,qxmxm  dmmmmm,dmmxmm  tmmmmm,tmmxmm  qmmmmm,qxmxmm  pmmmmm,pxmmxm  dmmmmmm,dmmxmmm  tmmmmmm,tmmxmmm  qmmmmmm,qxmmxmm  pmmmmmm,pxmmxmm  dmmmmmmm,dmmxmmxm  tmmmmmmm,tmmxmmxm  qmmmmmmm,qxmmmxmm  pmmmmmmm,pxmmmxmm  mmmmmmmm,mmmmxmmm"   colon  word
+
+postp	"m"		  word  word
+
+regress  mdtqpxf>\ (!_!)   word  word
+
+#
+# zkracování isolovaných a ostatních taktù podle poètu slabik - ipcz
+#
+
+regress  _\ >I(0_0)	sent   word	; isolated words
+inside   I
+{
+	<   word   syll
+		contour  t/+33	word word
+		contour  t/+0	word word
+		contour  t/-15	word word
+		contour  t/-25	word word
+		contour  t/-31	word word
+		contour  t/-33	word word
+	>
+}
+inside   !I
+{
+	<   word   syll
+		contour  t/+8	word word
+		contour  t/+0	word word
+		contour  t/-5	word word
+		contour  t/-8	word word
+		contour  t/-10	word word
+	>
+}
+regress  I>_(!_!)	sent   word
+
+#
+#  Právì jsme pøestali "I" pou¾ívat k oznaèení isolovaných
+#  taktù a zaèneme ho pou¾ívat k oznaèení taktù iniciálních.
+#
+#  P bude oznaèovat takt pøedcházející poslednímu.
+#
+
+regress	 _\ F>M(!_!)	colon	word
+regress	 M>I(0_!)	colon	word
+
+#
+#  Rozdìlíme M na A a B podle toho, zda budeme chtít
+#  kadenci klesavou nebo stoupavou. Oznaèování se dìje
+#  zleva:  IMMMMPF -> IBMMMPF -> IBAMMPF -> IBACMPF ->
+#  -> IBACBPF a pak dal¹ím pravidlem -> IBABBPF
+#
+
+subst   "IM,IB  BM,BA  AM,AC  CM,CB"	colon  word
+regress  C>B(!_!)			colon  word
+
+regress  IAB>F(!_0)	colon	word	; a,b: F (kA, kB)
+regress  IAB>aab(!_ab)	colon	word	; O,P: F-1 (kA, kB)
+regress  F>T(!_0)	sent	word
+
+# Toto pravidlo je nejspí¹ reliktem minulosti
+#with	postp2.dic	colon   word
+#{
+#	regress   FT>M(!_!)	colon	word
+#}
+
+#
+#  Nyní máme oznaèeny takty I, M, P, F, T ( = FF) a pøiøazeny kadence.
+#
+
+#
+#  pøi pøiøazování kadencí se hodnota pøiøazená slabice
+#  vztahuje na v¹echny její hlásky v pou¾itém slabièném
+#  èlenìní
+#
+
+inside	IaA	word
+{
+	<	word  syll	; tzn. zaøiï se dle poètu slabik v taktu
+		{					; monosylaba se ignorují
+		}
+		[					; disyllaba
+			contour	 f/+2:-3	word   syll
+			contour	 f/+4:-4	word   syll
+			contour	 f/-3:-3	word   syll
+		]
+		[					; trisyllaba
+			contour	 f/+2:+0:-4	word   syll
+			contour	 f/+2:-2:-4	word   syll
+			contour	 f/+4:+0:-4	word   syll
+			contour	 f/-2:-2:-6	word   syll
+			contour	 f/+0:-4:-4	word   syll
+			contour	 f/-4:+4:-6	word   syll
+			contour	 f/-4:+0:-4	word   syll
+			contour	 f/-2:-3:-3	word   syll
+		]
+		[					; tetrasyllaba
+			contour	 f/+0:+0:-2:-3	word   syll
+			contour	 f/-2:-2:-5:-5	word   syll
+			contour	 f/-3:+0:-2:-3	word   syll
+			contour	 f/+0:+0:-1:-1	word   syll
+
+		]
+		[					; pentasyllaba
+			contour	 f/-2:+0:-2:-3:-3	word   syll
+			contour	 f/-3:+0:+0:+0:-3	word   syll
+			contour	 f/-2:+0:+0:+0:-2	word   syll
+		]
+		nothing		; hexasyllaba a del¹í se neøe¹í
+	>
+}
+
+
+inside	F	word		; F A - never used
+{
+	<	word  syll	; tzn. zaøiï se dle poètu slabik v taktu
+		{					; monosylaba se ignorují
+		}
+		[					; disyllaba
+			contour	 f/+4:-4	word   syll
+			contour	 f/-3:-3	word   syll
+		]
+		[					; trisyllaba
+			contour	 f/-4:+4:-6	word   syll
+			contour	 f/-4:+0:-4	word   syll
+			contour	 f/-2:-3:-3	word   syll
+		]
+		[					; tetrasyllaba
+			contour	 f/-3:+0:-2:-3	word   syll
+			contour	 f/+0:+0:-1:-1	word   syll
+
+		]
+		[					; pentasyllaba
+			contour	 f/-2:+0:+0:+0:-2	word   syll
+		]
+		nothing		; hexasyllaba a del¹í se neøe¹í
+	>
+}
+
+inside	bB	word
+{
+	<	word  syll
+		nothing				; monosylaba
+		[				; disyllaba
+			contour  f/-4:+2	word   syll
+			contour  f/-5:-1	word   syll
+			contour  f/-3:+4	word   syll
+		]
+		[
+			contour  f/+0:-4:+0	word   syll
+			contour  f/+0:-6:-2	word   syll
+			contour  f/-6:-2:+0	word   syll
+			contour  f/-1:+3:+5	word   syll
+			contour  f/-6:-6:+0	word   syll
+			contour  f/-6:+4:+0	word   syll
+			contour  f/-4:+2:+4	word   syll
+		]
+		[
+			contour  f/+0:-3:-2:+0	word   syll
+			contour  f/-4:-4:-2:+2	word   syll
+			contour  f/+0:-3:+0:+2	word   syll
+		]
+		[
+			contour  f/+0:-3:-2:+0:+1	word   syll
+			contour  f/+1:-1:-1:-1:+1	word   syll
+			contour  f/-2:-2:+0:+2:+2	word   syll
+		]
+		nothing
+	>
+}
+
+
+inside	F	word
+{
+	contour   f/-2	word  word
+	<		word  syll
+		nothing				; monosylaba nejsou
+		[				; disyllaba
+			contour  f/-5:-1	word   syll
+			contour  f/-3:+4	word   syll
+			contour	 f/+4:-4	word   syll
+			contour	 f/-3:-3	word   syll
+		]
+		[
+			contour  f/-6:-6:+0	word   syll
+			contour  f/-6:+4:+0	word   syll
+			contour  f/-4:+2:+4	word   syll
+			contour	 f/-4:+4:-6	word   syll
+			contour	 f/-4:+0:-4	word   syll
+			contour	 f/-2:-3:-3	word   syll
+		]
+		[
+			contour  f/-4:-4:-2:+2	word   syll
+			contour  f/+0:-3:+0:+2	word   syll
+			contour	 f/-3:+0:-2:-3	word   syll
+			contour	 f/+0:+0:-1:-1	word   syll
+		]
+		[
+			contour  f/-2:-2:+0:+2:+2	word   syll
+			contour	 f/-2:+0:+0:+0:-2	word   syll
+		]
+		nothing		; hexasyllaba a del¹í se neøe¹í
+	>
+}
+
+inside	?	sent
+{
+	regress   T>Q(!_!)	word   word
+}
+
+
+inside	T	word	; soubor C
+{
+	contour   f/+2	word  word
+	<		word  syll
+		nothing
+		[
+			contour  f/-6:-16	word   syll
+			contour  f/-4:-14	word   syll
+			contour  f/-2:-14	word   syll
+			contour  f/+2:-14	word   syll
+		]
+		[
+			contour  f/-4:-9:-14	word   syll
+			contour  f/-4:-6:-14	word   syll
+			contour  f/-6:-10:-14	word   syll
+			contour  f/-6:-16:-18	word   syll
+		]
+		[
+			contour  f/-4:-10:-12:-14	word   syll
+			contour  f/-2:-4:-8:-14		word   syll
+			contour  f/-2:-10:-14:-16	word   syll
+		]
+		[
+			contour  f/-2:-2:-4:-8:-14	word   syll
+			contour  f/-2:-10:-12:-14:-16	word   syll
+			contour  f/-2:-4:-12:-14:-16	word   syll
+		]
+		nothing
+	>
+}
+
+inside	Q	word	; soubor D
+{
+	contour   f/-2	word  word
+	<		word  syll
+		nothing
+		[
+			contour  f/-6:+4	word   syll
+			contour  f/-10:+14	word   syll
+		]
+		[
+			contour  f/-8:-6:+4	word   syll
+			contour  f/-8:+2:+1	word   syll
+		]
+		[
+			contour  f/-6:-6:-7:+5	word   syll
+			contour  f/-6:+6:+6:+3	word   syll
+		]
+		[
+			contour  f/-6:-6:-7:-8:+5	word   syll
+			contour  f/-8:+7:+7:+3:+1	word   syll
+		]
+		nothing
+	>
+}
+
+#
+#  úseková deklinace frekvence (zatím jen do 11 taktù v úseku)
+#
+
+<  colon  word	; tzn. zaøiï se dle poètu taktù v promluvovém úseku
+    3x	nothing			; jeden a¾ tøi takty se neupravují
+	contour		f/0:-1:-2:-3				colon  word
+	contour		f/0:-1:-2:-3:-4				colon  word
+	contour		f/0:-1:-2:-3:-4:-5			colon  word
+	contour		f/0:-1:-2:-3:-4:-5:-6			colon  word
+	contour		f/0:-1:-2:-3:-4:-5:-6:-7		colon  word
+	contour		f/0:-1:-2:-3:-4:-5:-6:-7:-8		colon  word
+	contour		f/0:-1:-2:-3:-4:-5:-6:-7:-8:-9  	colon  word
+	contour		f/0:-1:-2:-3:-4:-5:-6:-7:-8:-9:-10	colon  word
+	contour		f/0:-1:-2:-3:-4:-5:-6:-7:-8:-9:-10:-11	colon  word
+	nothing
+>
+
+#
+#  vìtná deklinace frekvence (zatím jen do 9 úsekù ve vìtì)
+#
+
+<  sent  colon	; tzn. zaøiï se dle poètu promluvových úsekù ve vìtì
+    2x	nothing			; jeden a¾ dva takty se neupravují
+	contour		f/0:-2:-4:			sent  colon
+	contour		f/0:-2:-4:-6			sent  colon
+	contour		f/0:-2:-4:-6:-8			sent  colon
+	contour		f/0:-2:-4:-6:-8:-10		sent  colon
+	contour		f/0:-2:-4:-6:-8:-10:-12		sent  colon
+	contour		f/0:-2:-4:-6:-8:-10:-12:-14	sent  colon
+	contour		f/0:-2:-4:-6:-8:-10:-12:-14:-16	sent  colon
+	nothing
+>
+
+regress   0>\#(!_0)	colon	; vlo¾ení pausy
+inside	\#	phone
+{
+	contour   t/-65   phone
+}
+
+5x  regress   0>\#(!_0)	sent	; vlo¾ení pausy
+
+if   kadlec_dph
+	segments  kadlec.dph    colon
+if   !kadlec_dph
+	segments  traditnl.dph  colon
+
+#
+#  mírné vyhlazování se zejména sna¾í, aby hranièní difony
+#  mezi slabikami získávaly prosodické hodnoty èásteènì
+#  od obou slabik.  Pøedpokládá se, ¾e difon pøechodu mezi
+#  hláskami je pøipojen k hlásce prvé, proto se pøihlí¾í
+#  pouze k pravému sousedu (váha 30%, vlastní hodnota
+#  má tedy váhu 70%). Ideologicky èistá øe¹ení jsou buïto
+#  nevyhlazovat vùbec (pøiøadit difon doleva), nebo
+#  vyhlazovat f/50\50, tj. kvalifikovat difon jako spojovací.
+#
+
+smooth   f/70\30     word segment
+

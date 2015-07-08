@@ -1,0 +1,4 @@
+#! /bin/sh
+
+cat ../src/options.lst | sed -e '/#define/d' -e '/^\(..._\)\?OPTION[^A]/!d' -e 's@.*(\([^,]*\),[^/]*@<tag>--\1</tag>@g' -e 's@/@@g'
+

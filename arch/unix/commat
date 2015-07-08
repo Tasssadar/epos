@@ -1,0 +1,2 @@
+#!/bin/sh
+for i in *.html; do echo -e ",s/&commat;/@/g\nw" | ed -s $i 2>/dev/null; done

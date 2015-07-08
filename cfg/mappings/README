@@ -1,0 +1,11 @@
+The files in this directory are a selection from the publicly available
+mappings between the Unicode and selected eight bit encodings used
+by Epos for language configurations and/or communication.
+
+The authors of Epos don't claim any copyright to these files and they
+humbly ask anybody interested in using them outside of Epos to download
+an up-to-date version of the same files directly from the Unicode consortium.
+
+The same source can be used to add any other encodings here (simply download
+the required mapping file as is); or, you can easily write your own if you
+prefer.

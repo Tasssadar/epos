@@ -1,0 +1,1511 @@
+
+
+RECENT CHANGES can be tracked at the BOTTOM END.  The rest doesn't qualify
+as an exciting story, just skip it.
+
+[ Note: some items mention who reported a bug or even did the
+described modification.  The absence of such attribution
+doesn't imply that the work did itself spontaneously.
+Notably Pavel Machek, Adam Nohejl, Daniel Sobe, Mirek Trmac and Milan Zamazal
+contributed in this way much more often than explicitly indicated here.     ]
+
+
+1.1.1 from earlier releases (incomplete):
+	- this file
+	- debugging & other conditional compilation parameters have been moved
+		to the config file. doc/debug.doc has been rewritten
+	- fixed the array size in sss.cc to fit into the 64K DGROUP in DOS
+	- fixed shriek() not to be volatile and to always take signed ints
+	- allowed (hack) 16-bit ints in load_config and DOS HUGE memory model
+	- "make tgz" (in sss/src) makes a tgz (in sss/src/../..) with the
+		name sssX-Y-Z.tgz; the version numbers as read from common.h
+		A copy is made on the diskette (if one is inserted at the moment).
+	- "make date" outputs the last modification time
+
+1.1.2 from 1.1.1	10.5.97
+	- "make dos" creates a zipfile, not individual files
+	- "make dos1250", "make dos1252" can produce two other encodings
+	- in unit::sanity, fixed the range checks for pointer values
+	- migrated the rest of non-ASCII chars out of the sources
+	- migrated another bunch of options to the .ini file
+	- allowed escape sequences and quoted strings in the .ini file
+	- multiple tiny code amendments
+	- no compile-time checking for the memory model
+	- run-time check whether we've been compiled fully 32-bit (again)
+	- changed warning flags to -Wall -Wno-parentheses -Wno-unused
+	- new option type: DEBUG_AREA (enum, just for focus_dbg)
+	- interf.h uglified
+	- side syllables hacked out. See unit:syll_break for more info.
+		The feature can be disabled in the .ini file (syll_break())
+		cfg/nonsyl.dic has been consequently cleaned up.
+	- the sonority rule no longer considers nasals as more sonorous than
+		the ordinary consonants. Hope it doesn't hurt.
+	- parser now can accept keyboard input & other minor improvements there
+	- new files in the doc directory: Intro, Files
+
+1.1.3 from 1.1.2	14.5.97
+	- enums UNIT, OPT_TYPE suffer formally renamed elements because of Borland
+	- BOOL, INT, STR (formerly STRING),... in config.cc are always #defined now
+	- a new diphone inventory description (.dph) - the traditional one.
+		Very crude, lots of the diphones discarded (incl. W[{>,` etc.)
+		This inventory doesn't cover some allophones at all, see default.rul
+	- in unit::set_father(), f,i,t will be inherited (untested). This should 
+		allow phone-level f,i,t adjustments propagated to the diphones.
+	- unit::diph() optionally allows repeated diphones (have a look there).
+	- we now allow "triphones" (like "a'a", a.k.a. "a|a" in traditnl.dph)
+	- the default rules contain one killer rule (until traditnl.dph is fixed)
+
+1.1.4 from 1.1.3	19.5.97
+	- optional hash table profiling; configurable hash table full percentage
+	- removed a word-length quadratic complexity aspect of subst() by not 
+		checking too long words (longer than hash::longest). Typically,
+		this "feature" will cause an overall slowdown. :-)
+	- fixed unit::subst to loop until there's nothing to substitute
+	- traditnl.dph is less crude now, it only doesn't solve the voiced 
+		affricates now. We still never use many important diphones.
+	- some big fixed-length auto arrays have been made static & malloced
+	- introduced cfg.safe_grow, but still not configurable
+
+1.1.5 from 1.1.4	22.5.97
+	- '\0' shall be replaced by '_' in parser::getch; '\0' never gets output.
+	- unit::fout is much more configurable now, see config.cc
+	- tabs regularized to eight chars
+
+1.1.6 from 1.1.5	27.5.97
+	- config.cc #inclusion scheme has been substantially reworked
+	- aggregate (array...) config options are now possible, see config.cc
+	- unit::fout is even more configurable now. And slower as well.
+	- ANSI escape sequences mostly made configurable
+	- can remove elements from the hash tables now
+	- invalid options are checked against
+	- fixed pointer sanity checks (when trusted_ptr==off)
+	- added doc/output.doc
+
+1.1.7 from 1.1.6	28.5.97
+	- fixed a stupid "last byte swallowing" bug
+	- added diphtong rules, made traditnl.dph handle diphtongs better
+	- too high level symbols, which could make the parser prematurely
+		terminate a substitution, are checked against (parser::done)
+	- gather now gathers everything, thus preserving syllables etc.
+		during substitutions. This makes work multiple multilevel
+		substitutions, such as "ououo" -> "ou|ou|o".
+	- prep is temporarily broken
+
+1.1.8 from 1.1.7	29.5.97
+	- fixed prep &c (bug having to do with M_EXACT and unit::gather())
+	- if a preposition occurs at the end of a colon, let it be fatal
+	- added the FILE cfg option type
+	- deuglified load_config()
+
+
+1.2.-1 from 1.1.8	30.5.97
+	- converted all printf's to redirectable calls. Use "stddbg_file",
+		"stdshriek_file", "stdwarn_file" in sss.ini to redirect them.
+		An exception is user_pause(), which should never be redirected
+	- renamed sss to ss, 'cause 'tis shorta.
+	- colorize() now doesn't check against redirected input
+	- rewrote the stuff about ss_init(), multiple .ini files
+	- at the very beginning, the debug output may go temporarily
+		to the screen. It will be redirected properly after
+		the .ini file which uses it is redirected.
+	- we now have cfg/ssfixed.ini and ss.ini instead of sss.ini.
+		Any values in ss.ini override those in ssfixed.ini. The idea 
+		is not to bury the oft-changing params in the permanent ones.
+	- the "markup_language" configuration parameter (MUST be located
+		in ssfixed.ini!, possible values: none, ansi, rtf) allows
+		run-time switching between ANSI output and the Rich Text Format
+		output. Either ssansi.ini or ssrtf.ini is processed after
+		ssfixed.ini
+	- ss_reinit() can be used to re-read the config files. Not fool-proof.
+	- ss_init() shall be used instead of load_config()
+
+1.2.0 from 1.2.-1	1.6.97
+	- cfg/ssdeflt.ini (used by ss_reinit()) is now automagically generated
+		from src/config.cc (on "make")
+	- Makefile deuglified a little bit
+	- fixed hash::hash (empty lines had been creating phantom items)
+	- doc/output.doc includes new topics (e.g. debugging info redirection)
+	- fixed safe_grow and max_line_len to be configurable
+	- got finally rid of ANSI escape sequences in config.cc
+	- made '~' a valid word separator (e.g. in a dictionary)
+
+1.2.1 from 1.2.0	13.6.97
+	- fixed some of the silly Borland warnings
+	- removed -Wno-parentheses (and fixed some lines which got it)
+	- added nnet.cc (neural networks' input - see doc/neuralnet.doc)
+	- consistently changed "auxiliary syllable" to "side syllable"
+	- changed warning flags to -Wall with no exceptions
+	- faked the use of unused function arguments, see unused() in common.h
+	- added the "text" abstraction (src/text.*) to handle #include in rules
+	- maybe fixed a DOS CR/LF freadin() bug
+	- gather() called after the diphones get created now shrieks gracefully
+
+1.2.2 from 1.2.1	 2.7.97
+	- no code change, makefile adjusted for the files that were new in 1.2.1
+
+1.2.3 from 1.2.2	 7.7.97
+	- minor code changes in text.*, chasing a DOS-only Heisenbug (lost)
+
+1.2.4 from 1.2.3	 14.9.97
+	- fixed this==NULL sanity check in unit::sanity()
+	- made parser skip any garbage (whitespace?) until the first phone
+	- minor amendments to text.cc
+	- made hash.cc a little bit more commentproof
+	- when DEBUG is defined, free() is #defined to paranoid_free() (see)
+	- fixed tmps declaration in rules::str2rule() (the DOS-only bug?)
+	- improved cfg/syll.dic (laryngeal stop before word-initial vocals)
+	- fixed long vowels in the nnet code (unit::nnet_type())
+	- the glottal stop is now a valid voiceless stop for the nnet code
+
+1.2.5 from 1.2.4	29.9.97
+	- added doc/COPYING (GNU Public License - copyleft) to fix the legalese
+	- the paranoid_free() hack from 1.2.4 has been removed. Because,
+	- dmalloc (debugging mem alloc()) library is used #ifdef WANT_DMALLOC
+	- fixed a fence-post error (rules::rules::ruleline one byte too short)
+	- rules::resolve_vars now uses a pseudostatic buffer (was call-lived)
+	- the FOREVER macro should be used to mark permanent memory allocations
+	- some minor memory leaks have been found and fixed
+	- rewrote hash::hash to make it even more commentproof, but messier
+	- "make clean" tries to clean up the Makefile and report some settings
+	- cleaned up parser::parser, parser.cc now depends on interf.cc::freadin()
+
+1.2.6 from 1.2.5	29.10.97
+	- partly allowed deletion of the last phone in a syllable
+	- const char * everywhere to be -Wwrite-strings clean
+	- hash collisions are now handled with a balanced AVL tree
+	- furthermore, on hash table over/underflow it is completely rehashed
+	- made the only nnet.rules substitution not destroy syllables
+	- fixed a trailing whitespace bug in hash:hash
+	- it is possible to remove the diphones with "DIPHONES ~" rule
+	- option to dump the diphones at every DIPHONES rule (immed_diphones)
+	- added a punctuation hack into the nnet rules and similar minor fixes
+
+
+1.3.-2 from 1.2.6	 3.11.97
+	- aux/addcflag to easily add compiler flags; used by "make gdb/pg"
+	- "make clean" tries harder to clean up the Makefile
+	- simple suprasegmentalia (doc/rules.doc, doc/prosody.doc)
+	- hash::add_int/translate_int now understands negative quantities
+	- version optionally printed on startup
+	- hash table can work with other keys/data than char*/char* now
+	- fixed substitutions ('$' didn't work if scope->cont!=NO_CONT)
+	- new rule type RAISE - move tokens to other levels
+	- fixed some harmless memory leaks with ss_done()
+	- added rules to mark wh-quesions as such
+	- if there is nothing for a postp/preposition to join to, it's ignored
+
+1.3.-1 from 1.3.-2	17.11.97
+	- inline is never used under DOS, Borland can't handle it properly
+	- snprintf is no longer used, it is unportable
+	- allowed no value in .ini files, default is "".
+	- long command line options etc. (see doc/options.doc)
+	- fixed: if no phones given to the parser, it would crash
+	- ss.cc is now compiled separately, thus speeding up the compilation
+	- new rule type SMOOTH - smoothen suprasegmentalia (doc/rules.doc)
+	- unit::project() - move suprasegmental adjustments to a certain level
+	- some short command options, still undocumented
+	- f,i,t is now kept zero-relative, not neutral-value-relative
+	- unit::effective is now a uniform sum of the adjustments
+
+
+1.4.-2 from 1.3.-1	 8.12.97
+	- "gcc -pipe" might compile a bit faster
+	- src/x moved to aux/xd
+	- default.rul renamed to czech.rul
+	- rule is now a fully-fledged class with a VMT, doc/classes.doc
+	- stopped trying to avoid multiple-loaded dictionaries
+	- moved the "scope" logic from unit::...() to rules::apply()
+	- rules get precompiled much tighter
+	- made hash dmallocable
+	- fixed profiling (LDOPTS in the Makefile)
+	- REGRESS and PROGRESS now can insert new units (doc/rules.doc)
+	- this allows for throwing out many subst rules
+	- simple help for single-letter (short) options
+	- debugging tags - rules now have source file/line information
+	- copy constructor for hash tables (could be made faster)
+	- class block - a subblock of rules (doc/rules.doc)
+	- fixed the "Undefined identifier (null)" error message in resolve_vars
+	- conditional rules (rule type IF)
+	- first try at merging in the win32 and .wav generator code
+	- dos package contains files from var subdir
+	- shriek() is now more consistent (integers should have their %d)
+	- rule can begin with 0 or more words of comment (hm, inconsistent)
+	- str2rule renamed to next_rule, cleaned up, added functionality
+
+1.4.-1 from 1.4.-2	11.12.97
+	- doc for r_if (doc/rules.doc)
+	- renamed some sources (r*)
+	- calling syn32.cc to write the samples somewhere, rewrote ss.cc
+	- redesigned czech.rul, though the old style is still supported
+	- minor memory leaks fixed
+	- updated copyright notices in syn32.*, common.h, and COPYING
+	- adjusted class dsynth (former DifSynt)
+	- threw out dos support files again
+	- some options for controlling syn32.cc output
+
+1.4.0 from 1.4.-1	15.12.97
+	- adjusted class synteza in syn32.cc
+	- option wav_header to turn off the header	
+	- wiped out lot of now redundant scoping code out of elements.cc
+	- added hash::write(), hash::update(), doc/hash.doc
+	- new option -n - neuronet rules
+	- synth32.cc now tests whether it was able to open its files
+	- doc/sound.doc
+	- if paranoid, rules cannot begin with the old-style comment
+
+1.4.1 from 1.4.0	18.12.97
+	- renamed syn32.cc to synth.cc
+	- changed div.quot to / throughout synth.cc
+	- handling 0 models for a diphone differently
+	- ammended the (unused) hash<non-char> code
+	- fixed the directories (cfg!=src/cfg)
+
+1.4.2 from 1.4.1	19.12.97
+	- the default config now really speaks to /dev/dsp16
+	- updated doc/sound.doc 
+	- fork() suggested in ss.cc as an example
+
+1.4.3 from 1.4.2	22.12.97
+	- rules can examine string configuration parameters (/dev/rules.doc)
+	- twice using strcasecmp() (if not portable, replace with stricmp())
+	- -d gives diphone names, not numbers
+	- -s makes ss speak (not default today)
+	- synteza::wave_buffer added (performance reasons)
+	- found and inserted the improved cfg/ptacek97.dph at last
+
+1.4.4 from 1.4.3	29.12.97
+	- fixed wavout maybe NULL bug in synteza::synteza()
+	- invent_dir now points to /usr/lib/ss
+	- improved prosody and other rules
+	- r_if renamed to r_inside, new rule r_if (constant comparison only),
+		it is not very useful at the moment, as we don't use "external"
+		parameters introduced in 1.4.3 as yet
+	- text to be processed can be given on command-line
+	- added some preliminary german.rul
+	- fixed splitting of a 'q'
+	- moved some more r_raise code from run-time to its constructor
+	- r_inside now accepts more sophisticated lists and handles them faster
+		(booltab instead of a simple strchr)
+	- it is possible to force hash tables to be power-of-two-sized,
+		thus avoiding division in hash::fn() on machines with no hw div
+	- fork() is used to speak the samples (if UNIX && needed && enabled)
+
+1.4.5 from 1.4.4	2.1.98
+	- the text to be parsed can be given directly on the command line
+	- option colloquial (-c) turns on the specific features of casual speech
+	- option irony (-i) turns on ironical prosody (tries to)
+	- non-terminated utterances (non-final colons) have been hacked a bit
+	- renamed struct diphone member "i" to "e" (possible naming conflicts
+		with local variables)
+	- partly united struct diphones with struct difon
+	- changed use_syn for inventar[2] - again a bug?
+	- stupid heuristic classification "se" as either prep or postp 
+
+1.4.6 from 1.4.5	4.1.98
+	- t/i adjustments ("korekce") can be turned on with a cfg par
+	- support for sampling frequencies other than 8kHz (cfg.sampling_rate)
+	- the sampling buffer now has the optimal size (hw dependent)
+	- sampling is done through the open() breed of functions, not the
+		fopen() one. Rationale: we need ioctl's, but not clib buffering.
+	- changed some #includes and Makefile dependencies
+	
+1.4.7 from 1.4.6	18.1.98
+	- multiple languages partially supported
+	- reshaped hash_table as a template
+
+1.4.8 from 1.4.7	26.1.98
+	- reduced number of diagnostic levels to 5 (0-4)
+	- cfg files moved to /usr/lib/ss
+	- .ini file for each diphone inventory added
+	- the ANYWAY option of hash tables (see doc/hash.doc)
+	- new target - make install
+	- make dist had to be rewritten
+
+1.4.9 from 1.4.8	27.1.98
+	- merged an improved synth.* by Petr
+
+1.4.10 from 1.4.9	 2.2.98
+	- makeinst - a bit more working cfg installer
+	- the bulk made a shared library libss.a
+	- make static  links statically (use for debugging)
+	- all directories are relative to cfg.base_dir
+	- stricmp, filenames made more consistent and portable
+
+1.4.11 from 1.4.10	 4.2.98
+	- #!/bin/bash is used to mark scripts as such
+	- detection of open syllables (marked with '~')
+	- minor dos fixes (fork(), open(,,)
+
+1.4.12 from 1.4.11	16.2.98
+	- dos fix - IS_NOT_SLASH in compose_pathname()
+	- significant prosody amendments
+	- backslash can escape exclamation marks within some rules
+	- nondeterministic [ ] rules (see "choices" in rules.doc) 
+
+1.4.13 from 1.4.12	23.2.98
+	- minor fixes (O_BINARY, f0 for int3, DOS documentation)
+	- choice probabilities and repeat counts (see rules.doc)
+	- winss.ini replaces ss.ini during "make dos"
+	- "make cfgsync" synces cfg for "make dos" and "make dist"
+
+1.4.14 from 1.4.13	 6.3.98
+	- Watcom changes merged
+	- null number pronunciation support (parser only)
+	- fixed r_syll to avoid "Nothing to split" with unknown symbols
+	- allowed multiple non-option parameters if not paranoid
+	- partly fixed voiced africates
+	- show_raw_diphs option added
+	- various diphone fixes
+	- .dph files moved somewhere under the inv directory
+
+
+1.5.-1 from 1.4.14	16.3.98
+	- Watcom/QNX and generic portability fixes
+	- regex rule support using rx library (turn on with WANT_REGEX
+		in src/common.h; see also rules.doc and "man grep")
+	- some Czech numerals (see lng/czech/num*) and other special stuff
+	- better guess at German vowel quantity rules
+	- -p option now stands for --pausing
+	- -H option lists the long options
+	- renamed inventories and associated files, see also inv/UNKNOWN
+	- renamed config.cc to options.cc
+	- first attempt at using autoconf to set up a configure script
+		(see the end doc/Files for an explanation)
+	- removed three obsolete output formatting options
+	- quoted exclamation marks in rule files are not expanded
+
+1.5.0 from 1.5.-1	20.3.98
+	- rx and regex are properly detected by configure
+	- speak using /dev/dsp instead of /dev/dsp16 (SNDCTL_DSP_SAMPLESIZE)
+	- doc/english/prosody.doc
+
+1.5.1 from 1.5.0	22.3.98
+	- partly fixed -soname stuff
+	- Czech numerals work quite well
+	- fixed glottal stops in inv/czech/traditnl.dph
+	- removed unsafe unlinks and unsafe grows...hopefully...
+	- escaped chars are more powerful now, text.cc:strip()
+	- crude pauses can be inserted (denoted by "#")
+	- cleaned up some #defines (bool constants, ESCAPE...)
+	- Czech voiced affricates now respect traditnl.dph
+
+
+2.-2.0 from 1.5.1	22.4.98
+	- ss now requires ssd and talks to it via TCP; ss is a mere stub now.
+	- "make monolith" makes the old non-networking ss
+	- new conditional rule type WITH
+	- preliminary support for multiple concurrent voices (inventories),
+		languages, syntheses, configurations.
+	- class lang, class voice; options.cc accordingly messified
+	- ss.cc, monolith.cc start to reflect language dependencies
+	- started to prefer egcs to gcc
+	- synth.cc, ktdsyn.cc reshaped as well as the respective headers
+	- halfway support for flexible stereo output
+	- moved upper/lowercase issues from parser.cc to the rules
+	- everything may have got broken this time, sorry
+	- this is not meant to be a functional version
+
+2.-2.1 from 2.-2.0	27.4.98
+	- debugging, debugging, debugging, still not working
+	- using the compiler instead of the linker in Makefile
+
+2.-2.2 from 2.-2.1	29.4.98
+	- nasals may become sonorous
+	- no accents when no intonation
+
+2.-2.3 from 2.-2.2	30.4.98
+	- more debugging, as always
+
+
+2.-1.0 from 2.-2.3	2.5.98
+	- by default, ss is static wrt libss, "make shared" to make it shared.
+	- implemented both sides of the Text-To-Speech Control Protocol
+		(see doc/english/protocol.doc)
+	- lpcsyn.{cc,h} is back, but doesn't get packed into the distribution
+
+2.-1.1 from 2.-1.0	4.5.98
+	- class lpcsyn splits into lpcint, lpcfloat and lpcvq
+	- distribution fixes
+
+2.-1.2 from 2.-1.1	5.5.98
+	- fixes
+
+
+2.0.0 from 2.-1.2	10.5.98
+	- lpcsyn again integrated, lpcsyn.h lost and rewritten
+	- more TTSCP commands: shutdown, set language, set voice, show
+	- some minimum exception handling is performed, still using shriek()
+	- fixed member pointers in options.cc (removed them)
+	- wave file header might start to work (untested)
+	- some traditional voices come back
+	- added GPL banners to all relevant files
+	- somehow integrated rx.c, rx.h
+	- abbreviations spelled out (cz)
+
+2.0.1 from 2.0.0	13.5.98
+	- regex is configured better
+	- rewrote freadin() to make it faster and not to duplicate files in memory
+	- the relax_input option turns unknown chars on input to deflt_char (broken)
+	- changed TTSCP handshake string
+
+2.0.2 from 2.0.1	17.5.98
+	- hash tables now do hash about any combination of types
+	- hash tables are slabbing (faster and possibly less memory consuming
+	- tcpsyn.h
+
+
+2.1.-1 from 2.0.2	 2.6.98
+	- channel type option implemented
+	- WITH rule debugged
+	- scroll lock LED tracks attached voices (for monolith)
+	- ssd offspring exits
+	- open syllables detection improved (cz)
+	- made daemon.cc rather unixy
+	- on linux, daemon debugging info goes to /dev/tty10
+	- select() multitasks concurrent connexion's options (contexts)
+	- cfg is no more struct configuration, it is struct configuration *
+	- moved diphone names physically out of struct voice
+	- copying-on-write configuration for individual connections (incomplete)
+	- basic authentication (TTSCP pass command)
+	- cfg/allowed.ini holds a list of TTSCP user changeable parameters
+
+2.1.0 from 2.1.-1	3.6.98
+	- egcs portability fix in hash.cc
+	- numerous harmless memory leaks and related cleanup
+
+2.1.1 from 2.1.0	6.6.98
+	- host of fixes, most of them dos-related
+	- a simple HOWTO to welcome newcomers
+	- daemon startup more persistent (retries binding if necessary)
+	- struct option changed, other cfg and context fixes
+	- a little ktdsyn code cleanup
+
+2.1.2 from 2.1.1	11.6.98
+	- the TTSCP_USER environment variable may point to a file with
+	  some initial TTSCP commands (used by the client)
+	- cfg/allowed.ini now works differently (and at all)
+	- rewrote cmd_set and associated stuff
+	- updated TTSCP response code stuff
+	- generalised r_prosody (two more questions in unit::sseg())
+	- long word shortening (ipcz)
+	- bool is now checked for by autoconf and handled in defaults.h
+	- makefile rules for configure and its dependencies
+	- minor QNX fixes
+
+2.1.3 from 2.1.2	14.6.98
+	- more QNX and src/configure fixes
+	- inline dictionary support (doc/czech/dict.doc, doc/english/rules.doc)
+
+2.1.4 from 2.1.3	16.6.98
+	- voidsyn and lpcsyn fixes
+	- lpcsyn now uses just "int" instead of occassional "long int" before
+	- dispatcher_pid (used to distinguish between the server processes)
+
+2.1.5 from 2.1.4	26.6.98
+	- sseg_weight options (turning off sseg values for some unit levels)
+	- the CONTOUR, NOTHING and switch (<...>) rules (see doc/*/rules.doc)
+	- non-phone substitutions (doc/czech/dict.doc, unit::relabel())
+	- the most of palkova.rul, preposition adjunction rules fixed
+
+2.1.6 from 2.1.5	28.6.98
+	- assim rules do not wipe zeroes
+	- numerals fixes
+	- spelling out rules improved (abbrev.dic and related rules)
+	- autoconfiguring socklen_t (some systems have it signed, some unsigned, some missing)
+	- pauses, changed prosody rules in czech.rul
+
+2.1.7 from 2.1.6	29.6.98
+	- "se" handling heuristics
+	- draft palkova.rul
+
+2.1.8 from 2.1.7	30.6.98
+	- numerous fixes, including Borland fixes in rx.c
+
+
+2.2.0 from 2.1.8	28.7.98
+	- soft options (user supplied voice options meaningful for a single language)
+	- doc/english/{options.doc,rules.doc} (in linuxdoc SGML)
+	- rule files now follow hash.* rules for comments (a comment-out
+		character must not be preceded by non-whitespace)
+	- it is now possible to use the "#include" directive in .ini files
+	- simpleparser renamed to parser and partly rewritten
+	- tokenizing (see src/parser.h)
+	- escape sequences in hash tables (dictiories)
+	- "make mh" is synonymous to "make monolith"
+	- if allowed.ini doesn't exist, an empty one is assumed.
+	- somewhat changed ss_init() ss_reinit(), ss_done(), forever() and others
+	- O_FILE option type no longer exists (only unit::fout() affected)
+
+	Merged from 2.1.7.1 (21.7.98):
+	- some qnx fixes
+	- ktdsyn prosody works properly now + related voice configuration fixes
+	- lpc-vq fixed
+
+	- changed freadin() calls to claim()/unclaim() pairs
+	- all indexing in lpcsyn.cc uses imodel (used to be ignored here and there)
+	- timestamping some files (daemon automatically rereads changed files)
+	- fixed preposition handling in certain contexts (cz)
+	- ss_done, ss_init, ss_reinit, ss_catharsis somewhat stabilised (related fixes)
+
+2.2.1 from 2.2.0	29.7.98
+	- better lpcsyn source handling; repacking
+	- fixed minor memory leaks
+
+2.2.2 from 2.2.1	30.7.98
+	- changed r_if to take a boolean voice option name as a parameter
+	- colloquial and irony options changed to soft, -c and -i removed
+	- got the traditnl.dph vs. kadlec.dph file switching stuff right (cz)
+	- got rid of stdwarn, moved stdshriek & stdbg to struct configuration
+
+
+2.3.-1 from 2.2.2	13.9.98
+	- ss is renamed to Epos. All file names, related identifiers and such
+		have changed.
+	- ss client renamed to "say"
+	- some voice-specific prosodic adjustments to a diphone are now done
+		in synth::syndiphs() (and do not alter the diphone stream anymore)
+	- waveform.cc (we now represent the output signal in the .wav file format)
+	- it is possible to generate the .wav data before attaching to a device
+	- src/agent.cc, agent.h, ttscp.cc; the new TTSCP protocol and streaming
+	- more built-in TTSCP command help
+	- exception handling reworked (proper response codes and classification)
+	- near-complete English documentation in linuxdoc-SGML
+	- option -e (or --show_phones) lists the sounds generated line by line.
+
+2.3.0 from 2.3.-1	20.9.98
+	- install script and #include fixes
+	- doc/english/allowed.ini integrated into doc/english/options.sgml
+	- protocol.sgml renamed to ttscp.sgml
+	- TTSCP delh command
+	- primitive tcpsyn (remote synchronous synthesis)
+	- unit::effective can use multiply levels instead of add levels
+	- scheduler somewhat secured against starvation
+	- documentation esp. on rules reorganised and improved
+	- documentation automatically tweaked and version-stamped
+	
+2.3.1 from 2.3.0	27.9.98
+	- more documentation improvements (spelling and formatting fixes)
+	- tcpsyn is now configurable using the "remote_server" option
+
+2.3.2 from 2.3.1	 7.10.98
+	- class unit is slabbed (allocated faster)
+	- individual options partly documented
+	- multiple src and autoconf fixes, better support for buggy compilers
+
+2.3.3 from 2.3.2	13.10.98
+	- ugly segfault in class ttscp constructor removed
+	- class context deletes its shdshriek and stddbg
+	- class navelcord (in src/navel.h) can be used to avoid memory leaks
+	  in case of exceptions
+	- documentation adjusted to sgml-tools 1.0.6,
+	  but the good old linuxdoc dtd (96) has been retained
+	- doc conversion to html and other formats somewhat debugged
+	- remaining individual options documented
+	- voice .ini files can be located in language dependent places
+
+2.3.4 from 2.3.3	19.10.98
+	- cfg->pseudo_root_dir limits the TTSCP file namespace
+	- ktd files placed more appropriately
+	- the LOG macro changed to  DEBUG(x,11,fprintf(stddbg,...);)
+	- struct cowabilium, cow_claim() introduced, 
+	- changed struct configuration to a a derived class (bad move?)
+	- removed a cfg bug when issuing strm a second time in TTSCP
+	- updated some files under doc/., renamed HOWTO to WELCOME
+
+2.3.5 from 2.3.4	20.10.98
+	- dist/inst script fixes ("cp" to "cp -a"), other minor fixes
+	- don't bind to "localhost", but to the real Internet address
+	  as given by gethostname() and getaddrbyname() in src/client.cc
+
+2.3.6 from 2.3.5	26.10.98
+	- don't connect to "localhost" (say and tcpsyn)
+	- symlinks are copied by aux/makeinst
+
+2.3.7 from 2.3.6	 2.11.98
+	- "say -l" lists languages and voices for the current language
+	- the daemon now binds to all available interfaces
+	- severe bug fixes in src/waveform.cc and src/tcpsyn.cc
+	- pushing file descriptors with select() (writing to sockets &c)
+	  and other changes to output agents (and struct wavefm semantics)
+
+2.3.8 from 2.3.7	6.11.98
+	- portability fixes (partly ported to Visual C)
+	- waveform agent type (dummy agent for trivial audio icons, untested)
+
+2.3.9 from 2.3.8	15.11.98
+	- explicit agent type specifiers within streams
+	- missing SNDCTL_DSP_SETFMT bug fixed (affected direct 16bit speech)
+	- get_result() in say.cc now returns the error code; related fixes
+	- SO_REUSEADDR placed correctly, the persistence option removed
+
+2.3.10 from 2.3.9	23.11.98
+	- fixes: a_disconnector, waveform input
+	- Visual C portability adjustments and VC bug workarounds
+	- aux renamed to arch/unix, moved/deleted some files
+
+2.3.11 from 2.3.10	30.11.98
+	- numerous fixes, including a diphones input agent fix
+	- TTSCP greeting string includes Epos version number
+	- nonblocking soundcard writes ioctl()ified (OSS ignores O_NONBLOCK)
+	- the 'f' (aka "---forking") short option
+	- hacked up the global brk command
+
+2.3.12 from 2.3.11	6.12.98
+	- cfg/winepos.ini renamed to arch/win/epos.ini and other similar cleanup
+	- nonblocking sgets() can now cope with "no data on socket" situations
+	- stream::callbk is now scheduled inconditionally (not block()ed)
+	- async_close() forks off children to do fd closes on background
+	- memory leak in failing stream::stream() patched
+
+
+2.4.-2 from 2.3.12	28.12.98
+	- monosyll, polysyll contour (monosyll incomplete)
+	- lang and voice options on the cmd line successfully rejected
+	- control connections also use connection handles
+	- ctrl_conns and data_conns hash tables looked into and rewritten
+	- data command now limits the lifetime of that data connection
+	- intr command (good old brk) now breaks only one task
+	- TTSCP session headers
+	- setl command now sets a value for the current stream (only)
+	- setg command sets a value globally
+	- down command requires a completed server authentication state
+	- fixed a fence-post bug in sgets (when read() returns -1)
+	- fixed a bug in voice::operator new (used this_lang; was not parent)
+	- wavefm now doesn't unnecessarily explode the buffer when flush() busy
+	- verify.cc - a small test suite
+	- hash_table<...>::forall() added a user parameter for (*userfn)()
+	- hash_table<...>::get_random() allows user-controlled destruction
+	- server password stored to /var/run/epospwd
+	- czech.ini and palkova.ini merged to czech.ini with
+		naive.rul and prosody.rul conditionally included
+	- eposmh renamed to eposm, separate hash.o and hashm.o
+
+2.4.-1 from 2.4.-2	1.1.99
+	- tcpsyn fixed
+	- the --fallback_voice option (egcs 1.0.2 bugs may break it)
+	- #include &c changed to @include (rule file, ini files)
+
+2.4.0 from 2.4.-1	17.1.99
+	- handled missing params to TTSCP commands
+	- partly integrated ptdsyn by Martin Petriska + his support for Slovak
+	- fixed set to setl in xmit_option()
+	- reorganised /usr/lib/epos (lng, voice, inv)
+	- split the inventory packages off the main dist
+
+2.4.1 from 2.4.0	20.1.99
+	- preliminary qnx ipc proxy added
+
+2.4.2 from 2.4.1	25.1.99
+	- a trivial qnx ipc proxy client
+	- eliminated the 6xx TTSCP responses except for 600
+	- eliminated some unnecessary pragmas
+	- network unreachable condition detected
+	- doc/Files updated
+
+2.4.3 from 2.4.2	30.1.99
+	- split arch/dos off arch/win and related cleanup
+	- options.cc renamed to options.lst, comments added
+	- an unrelated options.cc split off the interf.cc file
+	- analogically, split interf.h to interf.h and options.h
+	- elements.{cc,h} renamed to unit.{cc,h}
+	- configuration cow scheme rewritten (was ill-conceived)
+	- streams no more have their own contexts, use a_ttscp->c
+
+2.4.4 from 2.4.3	10.2.99
+	- fixed wavefm::put_sample() (off-by-one error)
+	- fixed string values related memory leaks in the cowing code
+	- fixed hard data connection abort
+	- robust nonatomic appl bytes counts (untested, no client support)
+
+2.4.5 from 2.4.4	14.2.99
+	- fixed an unwanted dependency on epos-lpc (traditnl.dpt)
+	- prevented pwdfile hijacking in the "already running" situation
+	- send_appl reshaped to client_appl, now using the 123 TTSCP replies 
+	- fixed the replies sent by oa_waveform
+	- input agent type changed from T_NONE to T_INPUT, T_ANY removed
+	- unit::gather returns NULL if buffer overflow and not paranoid
+
+2.4.6 from 2.4.5	17.2.99
+	- portability, QNX and NT adjustments, code rearrangements
+	- fixed a few client error handling related functions 
+	- a queer scheme to supply cfg to client.cc without options.cc
+	- newline character in TTSCP changed from LF to CR LF
+		(no known compatibility issue)
+
+2.4.7 from 2.4.6	26.2.99
+	- QNX adjustments and other minor fixes
+	- waveform rewritten to handle the ioctl mess more transparently
+	- moved TTSCP command help strings out of the source
+	- banned async_close(-1)
+	- concentrated the TTSCP command syntax checking to PAR_SYNTAX
+	- introduced this_context to fix context switching upon shriek()
+		(very incomplete)
+	- /var/run/epos.pwd created only if listen_port == 8778
+	- new option "show_labels"
+
+2.4.8 from 2.4.7	 2.3.99
+	- fixed cow (failing to cow configuration->langs & lang->voices lists
+		and a pointer aliasing bug, cf. the next item)
+	- this_lang and this_voice variables changed to macros; referencing
+		them is now slower, while the context switch is faster
+	- NT adjustments, arch/dos/config.h.in
+
+2.4.9 from 2.4.8	10.3.99
+	- get_named_cfg & format_option unified, simplified, accelerated
+	- slab fragment size made slab-local
+	- fixed a 2.4.7 bug - long waveforms trunca being written to /dev/dsp
+	- additional ASCII characters permitted for Czech
+	- say can accept text through stdin
+	- pending data queues within streams
+
+2.4.10 from 2.4.9	15.3.99
+	- utterance chunking and joining
+	- some language dependent directory options now use the "lng" treename
+	- somewhat documented existing TTSCP modules in doc/english/ttscp.sgml
+	- some time sharing debugging
+	- slabbing langs and cfgs (very poorly)
+
+2.4.11 from 2.4.10	22.3.99
+	- fixed a reschedule bug
+	- sound ioctl adjustments to work on qnx
+	- added a proper cow() to voice_switch()
+	- language, voice made regular special typed options
+
+2.4.12 from 2.4.11	29.3.99
+	- QNX, NT and error-on-close fixes
+	- version stamps: /usr/lib/epos/version
+	- language and voice dependent options on the command line
+
+2.4.13 from 2.4.12	31.3.99
+	- NT fix (WSAStartup moved to a global constructor)
+	- data cmd: cannot refer to the present connection
+
+2.4.14 from 2.4.13	10.5.99
+	- say.cc fixes (strdup, pseudoconfiguration::paranoid)
+	- NT fix: async_close also attempts closesocket()
+
+2.4.15 from 2.4.14	21.6.99
+	- set of description layers made configurable
+	- option actions (pre-set and post-set)
+	- arrays of options indexed by description levels
+	  (not well documented nor robust)
+	- fixed a bug in enum2str() (trailing colon)
+	- fixed a bug in str2enum() (not found case w/o trailing colon)
+	- added more characters to mathsign.dic:  # `
+	- say now displays the transcription after the rules are applied
+
+2.4.16 from 2.4.15	8.7.99
+	- the configure script respects --prefix=  somewhat more
+	- INV_ prefixes in options.lst changed to VOICE_
+	- fixed a strip() bug in text.cc (multiple escapes on a line)
+	- Czech phone number prosody hack using \X
+	- #localsound output agent
+	- fixed a bug in agent::relax (wrong queue direction)
+	- tcpsyn deadlock avoided with a timeout between connect and TTSCP header
+	- it is possible to specify the language and/or the voice through the
+		"location" option for tcpsyn voices - see docs
+	- agents can now wait for other agents (agent::dep)
+	- {m,c,re}alloc everywhere checked against out-of-memory condition
+	- and other infrastructure fixes
+
+2.4.17 from 2.4.16	19.7.99
+	- changed "first" and "second" (channel identifiers for the --channel
+		option) to "left" and "right"
+	- four bytes of buffer space now guaranteed by flush() instead of two
+	- moved skip_waveform from attach(int) to flush()
+	- partly added diphone labels (except for flush() and become())
+	- using header.total_length for bookkeeping (RIFF chunks completely output)
+	- description layer valued options resurrected
+	- show command now prefixes the option value with a space
+	- --local_only option can provide reasonable privacy for trivial cfgs
+	- documentation formatting improved (sgml-tools, latex, and babel issues)
+	- obsolete "for (int tmp...)" scoping support in OPTIONARRAY initializers
+
+2.4.18 from 2.4.17	24.7.99
+	- minor compatibility fixes
+	- LPC voices: short pauses now actually follow sentences (using the silent
+		diphone 2); needs more work (extend to ktd, ptd, and adjust the length)
+	- Windows port automatically converts cfg and doc to CP1250 (hack)	
+
+2.4.19 from 2.4.18	14.8.99
+	- changed a huge static buffer in a_print::run() to a small growable one
+	- fopen() calls removed or made to check against oom - except ptdsyn
+
+2.4.20 from 2.4.19	29.8.99
+	- added the omitted mode argument to open() calls with O_CREAT
+	- fixed some unused arguments and other compiler warnings
+	- server password file not necessarily created
+	- fopen() can return stdin, stdout no more (should rather fdup() them somehow)
+	- fixed a typo in traditnl.dph (wrong ?¾á to correct ?0á)
+	
+2.4.21 from 2.4.20	 1.9.99
+	- turned utterance chunking off by default and added the -u flag to say.cc
+	- turned relax_input on by default
+	- --spell soft option for czech
+	- ceased to treat a newline as a space
+	- various ugly hacks in the Czech rules
+
+2.4.22 from 2.4.21	 3.9.99
+	- ordinal numbers in genitive in Czech
+	- fixed relax_input + default_char and made them a default option
+
+2.4.23 from 2.4.22	 4.9.99
+	- ugly hacks in Czech rules made clean features, ordinal numbers improved
+
+2.4.24 from 2.4.23	10.9.99
+	- local_only made true by default (no remote TTSCP access to the server)
+	- TTSCP handle length is now configurable (handle_size)
+	- __STDC__ is no more defined to 0 in arch/win/config.h
+	- other Borland C++ Builder related fixes
+	- --debug_password option (turned off by default)
+	- updated cfg/ttscp/help/*
+
+2.4.25 from 2.4.24	12.9.99
+	- redesigned struct wavefm, esp. flush() to accomodate the first
+		attempt at labels (--show_labels).  Made all members of wavefm
+		public and worse ugliness.
+
+2.4.26 from 2.4.25	17.9.99
+	- short options properly documented; -d, -e disappeared (use long opts instead)
+	- fixed a *""=0 bug in parse_cfg_str() with implicit option values
+	- fixed a --language option bug (server command line)
+	- made Epos gracefully shutdown at SIGTERM
+	- temporary symbols available in rules extended to \X,\Y,\Z,\W,\V,\U.
+	- fixed disconnection bug at the end of appl with Windows Sokec
+	- fixed some unit deletion stuff &c in unit.cc and elsewhere
+
+2.4.27 from 2.4.26	19.9.99
+	- fixed a typo in unit.cc (2.4.26 wouldn't compile)
+	- made say connect to "localhost", not to gethostname()
+		(so that it can find the server even with local_only).
+	- minor tweax inspired by Visual C++ warnings
+		socky #defined to (un)signed) to correspond to the socket type
+	- fixed the unlabeled waveform format (total_bytes was negative)
+
+2.4.28 from 2.4.27	22.9.99
+	- moved naive prosody stuff to lng/czech
+	- agent::timeslice now catches command_failed, so that errors during
+		stream processing are correctly reported and survived
+	- a minor VC fix (missing "socky" qualifier)
+	- fixed the lpcfloat voices (incorrectly interpreted models)
+	- monolith fixed
+	- intr command fixed (could send multiple 40x replies)
+	- next attempt at labelled waveforms
+	- added some missing stuff to the documentation, chapter Options
+
+2.4.29 from 2.4.28	28.9.99
+	- replaced gather and subst buffers with growable buffers
+		(subst and regex rules may get broken under some circumstances)
+	- added a max_text_size sanity check (as an option)
+	- fixed a set_option bug (setl could fail, but set the option to 0)
+	- a small fix in lng/czech/prosody.rul - penults always off-falling
+	- a few minor fixes
+
+2.4.30 from 2.4.29	 3.10.99
+	- new autoconf test - HAVE_REG_EEND
+	- arch/unix/Makefile.dummy made even more dummy
+	- Makefile made urmake compatible
+	- code pedantified (except for kill(), strcasecmp(), gethostname(), strdup())
+	- fix for infinite "grow sb" loop in unit::subst()
+	- allowed.ini renamed to restr.ini, together with the respective option
+		and its location can be changed with --base_dir
+	- added a security section to the documentation
+	- commented out the mark_voice() debugging thing in waveform.cc
+
+2.4.31 from 2.4.30	 6.10.99
+	- waveform stuff survives no sound ioctls found without FORGET_SOUND_IOCTLS
+	- minor fix to say.cc to avoid fopen(NULL)
+	- oa_wavefm::run() modified to run until EAGAIN (not just end of ophase)
+
+2.4.32 from 2.4.31	11.10.99
+	- removed superfluous explicit hash_table<char, char> instantiation
+	- removed and fixed most FIXMEs (in src/*.cc)
+	- properly escaped line-initial hash chars standing for pauses
+		in lng/*/traditnl.dph (discarded as comments until now)
+
+
+2.5.-4 from 2.4.32	19.11.99
+	- unit markers (see marker.cc) - that's why prosody is broken
+	- say.cc fix: no TTSCP_USER variable set
+	- minor additions to main.dic
+	- changed labelled waveforms from regions to labels and partly fixed them
+	- fixed sbsize related bugs
+
+2.5.-3 from 2.5.-4	20.3.00
+	- finished new prosody modelling
+	- mbrola-compatible speech synthesizer input format (SSIF) introduced
+	- prosody_dir option removed (prosody is language-dependent anyway)
+	- &commat;s hacked out in the HTML documentation
+	- incorporated a 2.4.36 to 2.4.40 patch:
+		- endianness and Solaris related fixes
+		- mmsystem compatibility (Petr)
+		- added an lpc voice, "theimer"
+		- voices reconfigured: rvq renamed to r-kubec-vq, r-vichova added
+		- permanent voice fallbacks
+		- put lpcsyn.cc lpcsyn.h under GPL
+		- repacked inventories (relative to /usr/lib/epos/inv, added READMEs)
+		- mmsystem and Visual C++ scripting fixes (Petr)
+		- a few voices changed prosodic defaults
+		- Windows specific regex configuration fixes
+		- #define __STDC__ braindamage removed from rx.h
+	- incorporated a 2.4.32 to 2.4.36 patch except for already present items:
+		- initializing unit::gb and unit::sb statically and related fixes
+		- partly fixed labelled waveforms (added a field to "cue " chunk header)
+	 	- fixed unlabelled waveforms (added "adjustment" to class w_ophase)
+	- smoothing by phone, not by segment in czech.rul (completely broken anyway)
+
+2.5.-2 from 2.5.-3	27.3.00
+	- renamed oldsynth back to synth
+	- mbrsyn
+	- new Slovak stuff (Martin)
+	- a subtle gather() bug fixed
+	- eight voices bug fixed
+
+2.5.-1 from 2.5.-2	not distributed
+	- drop connections and reread configuration on SIGHUP
+	- some harmless read-only overruns fixed
+	- traditional memory leaks associated with configuration strings fixed
+	- compose_pathname treats NULL string as ""
+	- chdir / on daemon startup
+		- consequently, --base_dir ../cfg ... was broken.  Fixed in 2.5.0
+	- other fixes
+	- static options
+
+2.5.0 from 2.5.-1	5.9.01
+	- incorporated a 2.4.40 to 2.4.66 patch
+		- sound labels
+		- label offset fix
+		- pause and nearby diphones fixed in ptacek97.dph
+		- some fixed diphone counts fixed
+		- label fixes
+		- say -d option (show segments)
+		- const qualifier fixes
+		- AC_CONST and AC_INLINE removed from configure.in (suggested by Milan Zamazal)
+		- syslog support
+		- hackfile used only if syslog is not available
+		- added authpriv option
+		- fixed a unit::subst bug (M_EXACT)
+		- attempt to improve syll.dic to handle i-i junctures
+		- HAVE_SYSLOGed severity() and other NT fixes
+		- fixed a VC bug (const qualifiers in ttscp_cmd decl)
+		- fixed cfg->wav_hdr (maybe)
+		- ulaw encoding, downsampling by one half (Petr)
+		- faster waveform generation (tranformations if any moved to wavefm::translate)
+		- waveform buffer is no more char*, but unsigned short* and hdr.buffer_idx
+			MUST be translated (multiplied twice) in wavefm::translate()
+		- fixed ordinal numbers in Czech (also added the gen_ordinals option)
+		- fixed waveform buffer realloc bug in wavefm::attach(int)
+		- fixed labels; configured with label_phones, label_seg, label_sseg
+		- partly added sseg labels
+		- added some option documentation and other doc updates
+		- added voice::operator delete(void *, lang *) and more warning avoidance
+		- changed output_rate option to out_sampling_rate
+		- banned spurious messages in lpcsyn.cc
+		- fixed	label_ssegs
+		- chmod 644 lpcsyn
+		- short option -u (no header, ulaw encoding, file name said.vox)
+		- removed the -fhandle-exceptions option for gcc
+		- fixed a sleep table bug in agent.cc
+		- moved mmsystem code from agent.cc to waveform.cc and somewhat fixed it (untested!)
+		- mmsystem interface fixes
+		- client-side written files (said.wav, said.vox), see the -w -m -o options
+		- --localsound, --writefs, --readfs options
+		- terminology: segments are no more called diphones (in general), except for
+			the TTSCP module name
+		- various documentation updates
+		- fixed a struct segment discrepancy between hacked and unhacked TTSCP
+			(dependence on label_sseg)
+		- fixed the unit::write_segs() pointer cache
+		- terminology: fixed arch/win/epos.ini (play_segments option), say, mh, doc, etc.
+		- a minor fix in wavefm::ioctl_attach, mmsystem code
+		- made wavefm::attach (and also buffer_size handling) more logical
+		- fixed waveform headers (ulaw format, alignment and other fields)
+		- optimized away wavefm::samp_size_bytes
+		- full_syslog option
+		- a more effective, though untested ulaw convertor
+			(#define OLD_9BIT_BASED_ULAW to override)
+		- treat \r as WHITESPACE 
+		- total_length is now filled in in waveforms transmitted over TTSCP
+		- label_sseg segfaults no more
+		- mmsystem wave header structure is now global, not allocated
+		- local_sound_device option
+		- mmsystem fixed not to release a live buffer data
+		- made the Bad option message less misleading
+		- some mediaeval options (concerning waveform handling) removed
+		- removed src/navel.h, src/riff.cc, src/label.cc
+		- removed a minor off-by-one bug in rule.cc
+		- fixed a LF->CRLF translation bug in say.cc (Windows only)
+		- moved most stuff from epos.ini to fixed.ini (both UNIX and Windows)
+		- adapted some option defaults and .ini file comments
+		- optimized away use_segs pseudooption
+		- line-final backslash now makes the line continue with the next physical line
+		- retreat to the old ulaw code
+		- odd chunk size bug fixed in wavefm::label()
+		- nine langs/voices bug fixed
+		- no waveform-initial cue point
+		- touched the NT service code a little bit
+		- wavefm.cc cleanup
+		- wavefm code support for non-16-bit samples etc. fixed
+		- minor fixes in wavefm code
+		- autoconf now avoids an unnecessary perverse librx.so
+		- made \n a word level character (for Czech)
+		- fixed the "daemon_log file cannot be created" scenario behavior
+		- declared the server shutdown flag volatile
+		- changed all debugging level 4 messages to level 3
+		- fixed parser aliasing for \r  (from space to newline)
+		- some read-only off-by-one bugs efenced off
+		- pre-set hooks allowed to return a new value, pre_init_f added
+		- memory leak in cow_free fixed (not freeing voice->syn etc.)
+		- wavefm::translate_data() fixed (zeroed data bug)
+		- written the NT service code from scratch
+		- removed some garbage and updated arch/unix/listtmp
+		- added the Portability documentation to the docs
+		- updated the WELCOME file
+		- NT related fixes, made most files 8+3 file naming convention compliant
+		- say is now able to start the service if privileged enough on NT
+		- Epos now installs as an interactive process by default
+		- monolith code fixed under windows
+		- documentation adjustments
+		- hash.cc split to hash.cc and hashd.cc, the latter includes the former
+		- global is_monolith flag instead of a #define
+		- only options accepted on Epos server command line
+		- removed monolith-only hacks in synth.cc
+		- preparing for a Windows CE port (kludges for missing APIs)
+		- split service.h to service.h and globals.h
+		- say.exe -k now can stop TTSCP service (NT only)
+		- tweaked subst() behavior (temporarily hiding the final separator)
+		- if paranoid, hashing rules don't postpone loading the dictionaries
+		- removed a few duplicate dph files
+		- new rules for Slovak
+		- diacritics used for diphtongs in Slovak and that made optional
+		- minor NT port fixes:
+			- project files, HAVE_FCNTL_H, MB_SERVICE_NOTIFICATION
+			- glibc regex code no more reports warnings
+		- minor CE port adjustments
+		- cfg->relax_input fixed
+		- more CE port adjustments, stdlib.cpp introduced
+		- side syll hack moved from source to the rules.  Major rule group
+			permutation in lng/czech/trans.rul (syllabification,
+			transcription, nonsyll prep adjoining, geminates groups)
+		- (Cz) fixed the voicing assimilation rule for ø after an
+			unvoiced nonsyllabic preposition; fixed ain$ -> ajn etc.
+		- fixed a unit::gather() bug
+		- fixed a unit::insert looping bug
+		- minor fixes to the Slovak rules (esp. disabled glottal stops)
+		- on UNIX, the init_time option
+		- a trivial agent profiler, see the profile option
+		- minor NT fixes, such as call_abort() or project settings
+		- fixed a select() bug
+		- fixed gettimeofday() autodetection (makes the built-in profiler work)
+		- (Sk) fixed soft option a_colons in slovak.rul
+		- fixed intr semantics (if nothing to do, return 423 instead of 200)
+		- made say more efficient wrt the TTSCP command flow
+		- fixed (rather, documented) some Windows socket issues, esp. readfs
+		- moved call_abort down rx.c
+		- avoided a spurious template instantiation warning in Visual C
+		- moved traditnl.dph from lng/slovak.prev to lng/slovak
+
+		- lng/slovak copied from 2.4.66, lng/slovak.prev copied from 2.5.-1
+		- WELCOME copied from 2.4.66
+		- changed also the capitalized DIPH* to SEG* (terminology change)
+		- made max_line static and similar randomly found fixups
+		- fixed --base_dir with relative pathnames
+
+		- .orig files still hold the 2.5.-1 contents
+
+2.5.1 from 2.5.0	27.9.01
+	- changed DEBUG() to DBG()
+	- removed Czech documentation files
+	- .orig files removed
+	- src/function.cc, made *gress (and other) rules use much less memory
+	- hackfile renamed to epos.err (still used only if no syslog)
+	- added encoding.cc, i.e. support for multiple character encodings
+	- URL spelling rules (unpronounceable consonant groups are spelled out)
+	- handling server -D option in a less cleverish way
+	- static option deallocation fixed
+	- Makefile on config.h dependency removed
+	- some error messages changed to the file:line format
+	- rules go on parsing after errors
+	- added an undocumented class of errors 88x
+	- fixed an incomplete conditional rule parsing bug
+	- max_errors, max_nest options
+
+2.5.2 from 2.5.1	8.10.01
+	- minor speedup of esctab related code, non-compressed functions added
+	- lng/czech/numerals.rul fixed (1[234] mili.*)
+	- minor documentation fix
+	- minor g++ 3.0 fix  (friend class syntax)
+	- fixed a segfault bug if no voices are configured
+
+2.5.3 from 2.5.2	18.10.02
+	- (Sk) voicing assimilation fix
+
+2.5.4 from 2.5.3	 7.4.03
+	- fixed a segfault bug if no soft options or voices for a language
+	- TTSCP modules: syn, dump
+	- say options: -s, -t
+	- mbrsyn and projection code heavily debugged
+	- new rule type: absolutize (temporary implementation)
+	- (Cz) generate_segs, traditional_dph options
+
+2.5.5 from 2.5.4	15.4.03
+	- SAMPA translation
+	- fixes related to the prosody (mostly to unit::t)
+
+2.5.6 from 2.5.5	29.5.03
+	- incorporated a 2.4.66 to 2.4.81 patch
+		- added tdpsyn.cc, .h
+		- incl. 2.4.66 to 2.4.67 patch (mostly related to tdpsyn and
+			adjustments in Czech and Slovak language configuration)
+		- tdpsyn rewritten
+		- added tdpsyn to arch/win/configure.bat, arch/win/epos.dsp
+		- tdpsyn now handles missing diphones based on paranoid the obvious way
+		- added mappings/README
+		- added r-violka and r-machac voices
+		- (Sk) removed |'s before diphonization
+		- (Sk) fixed the v>w rule
+		- (Cz + Sk) fixed the capitalization just after a non-letter spelling bug
+		- (Cz + Sk) (v zátvorke) "v uvodzovkách" (punctuation rendering for short texts)
+		- (Cz + Sk) fixes for URL spelling rules
+		- tdpsyn.cc now uses memset and memcpy properly instead of initialization loops
+		- added tcpsyn.max_frame; made the out_buffer size fit the segment inventory
+		- faster waveform->sample(SAMPLE *, int) used by tdpsyn
+		- (Cz + Sk) Roman numerals
+		- say first transcribes, then speaks
+		- (Sk) fixed voicing loss in voiced-final + personal pronoun
+		- function.cc, .h, encoding.cc, .h added to arch/win project files
+		- (Sk) fixed "tretiemu", ")]}", and many spellout forms
+		- various minor code fixes
+		- tdpsyn bug (OLA frames omitted) fixed
+		- say now attempts to connect to a public TTSCP server if needed
+		- (Cz + Sk) Roman numerals rules made more robust
+		- a marginal URL spelling fix (word-initial l,r)
+		- (Cz + Sk) workaround rule for noisy pause diphones
+		- (Cz) ucircle spellout bug fixed
+		- cosmetic header and source file fixes, libeposaif
+		- joined Petr's diffs from 2.4.73:
+			- linear predictive prosody modelling (tdpsyn)
+			- TSR debugging tool support (Win only)
+			- 1/3 and 1/4 downsampling band-pass filters
+			- tdpsyn prosody modelling fix
+		- fixed triphone files (betty.dph and violka.tdi)
+		- fixed lpc prosody
+		- added additive_cont option (needed with lpc prosody model)
+		- gauge prototype
+		- client.cc: sputs replacement callbacks
+		- nonblock.cc - handles control connection congestion
+		- split sleep_table to block_table and push_table
+		- minor scheduler and client code fixes
+		- added 2.4.77 fixes
+		- some LP prosody fixes
+		- fixed d.f parameter, it's really F0 now!
+		- (Win32) fixed missing 2x socky @ client.h
+		- (Win32) fixed missing nonblock.cpp @ configure.bat & epos.dsw
+		- odd sized translated data bug fixed
+		- max AVL tree depth for dictionary-oriented rules increased
+		- added many cross-references, examples and etc. to rules.sgml
+		- (Cz) "pøes" voicing assimilation behavior fixed
+		- negated dictionaries (r_prep, r_postp, r_with), M_NEGATED
+	- minor patch related fixes (spelling, spacing etc.)
+
+2.5.7 from 2.5.6	2.6.03
+	- incorporated a 2.4.81 to 2.4.Daniel patch (see applied-diff-81-to-Daniel)
+		most changes by Daniel Sobe and Jakub Adamek
+		- experimental German configuration (BOMP interface unfinished)
+		- neural net prosody modeling
+		- F0 smoothing
+		- pros_factor option
+		- F0 labeling
+		- r_mysubst
+		- (Win32) minor fixes
+		- struct option -> epos_option
+
+2.5.8 from 2.5.7	4.6.03
+	- changed DBG's to D_PRINTs
+
+2.5.9 from 2.5.8	6.6.03
+	- removed listtmp, Makefile.dummy, default.ini, maketgz, distcfg,
+		makedflt, makedflt.sed, addcflag, cstodos, makenicedate
+		install.sh, rerunepos, makeinst, doc/czech, doc/slovak etc.
+	- added automake support
+	- renamed src/nnet/string.h to slowstring.h (also string.cc, types.h)
+	- moved several files between doc and arch/unix
+	- moved doc/english/* into doc
+	- moved doc/Changes to Changes
+	- moved VERSION to configure.in
+	- cfg now installs to /usr/share/epos (instead of /usr/lib/epos)
+	- fixed the mbrola_binary option to accept relative names
+
+2.5.10 from 2.5.9	12.6.03
+	- say now recognizes --help
+	- slightly less obscure error messages for newcomer mistakes
+
+2.5.11 from 2.5.10	19.6.03
+	- fixed a connect bug if say is run with no name resolver
+	- install-data-hook -> install-data-local
+	- didn't forget to install cfg/root
+	- installed configuration directories are now mode 755
+	- .DELETE_ON_ERROR in Makefile.common
+	- missing sgml2html doesn't interrupt a make any more
+
+2.5.12 from 2.5.11	25.6.03
+	- shriek now accepts varargs, thus eliminated most fmt()s
+	- fmt() now uses scratch instead of error_fmt_scratch
+	- some error messages improved
+	- vrfy: some more tests
+	- using vsnprintf instead of vsprintf if available
+	- sending 401 reply at the end of the intr
+	- oa_wavefm::break now issues a 122 and no 123 reply
+	- moved vrfy into the new src/tests subdirectory and TESTS
+	- vrfy now can spawn (and uses and kills) a temporary Epos
+	- moved the compiler tests somewhat up the configure.in
+	- fixed yylex() in neural_parse.yy not to use yytoknum
+	- fixed the multiply defined CLEANFILES bug
+
+2.5.13 from 2.5.12	1.7.03
+	- fixed scratch overrun in say
+	- fixed say command line behavior wrt mixed text, dashes and options 
+	- fixed marker::operator < to take the explicit parameter by reference
+	- rewrote marker::merge()
+	- rewrote unit::~unit() to conserve space; don't delete next anymore
+
+2.5.14 from 2.5.13	20.7.03
+	- removed some misleading comments from some charset mappings
+	- added morpheme between syll and word in unit_levels
+	- rewrote parser initialization - simpler, flexer, faster
+	- perm_input@*, perm_working@* options
+	- random data test doesn't generate premature hard zeroes
+	- resets to normal color after an \e'd cfg opt value is printed
+	- r_analyze rule type - a simple morphematic analyzer
+	- hash_table::longest ignores items with replacees beginning in !META_
+	- removed the older time domain synthesizers
+	- capitalized documentation section titles and similar fixes
+	- updated the doc for some options
+	- updated option documentation tests
+	- use_nnet_phone changed to a soft option and renamed to nnet_phone
+	- added arch/unix/test.version to assist make distcheck
+
+2.5.15 from 2.5.14	8.8.03
+	- renamed INFINITY in unit.cc to avoid a conflict with C99
+	- updated the --help and -H outputs for all three command lines
+	- removed superfluous "use_" from the few affected boolean opts
+	- fixed charset setting while cfg re-read
+	- documented TTSCP modules dump and [p]
+	- changed some 86x errors to 46x
+
+2.5.16 from 2.5.15	12.8.03
+	- new LPC inventories (silent diphone added)
+	- cfg/inv now always includes kubec-vq, vichova-vq
+	- vrfy doesn't kill the temporary server but uses "down"
+	- config.guess, config.sub updated
+	- option "downgradables" solves several parser limitations
+	- adapted doc/intro.sgml to get the history closer to current reality
+
+2.5.17 from 2.5.16	12.10.03
+	- struct cue_point: the "chunk" member fixed from int[4] to char[4]
+	- (Cz + Sk) abbrev.dic, abbrurl.dic -> spellout.dic, spellurl.dic
+	- (Cz) soft option diphtongs (no diphtongs for mbr-cz1)
+	- SAMPA alternates are named by the sampa_alts list
+	- list_of_calls()
+	- SAMPLE is now signed 16 bit, got rid of SIGNED_SAMPLE
+	- unified t_samp to SAMPLE; replaced "long" and "short" ints by C99
+	- (Cz) fixed n_segs in theimer.ini
+	- removed nnet.cc
+	- encode_to_sampa() renamed to decode_to_sampa() for consistency
+
+2.5.18 from 2.5.17	19.10.03
+	- removed defaults.h
+	- hash tables lost independence on Epos
+	- hash tables lost DEBUG_HASH, PROFILE_HASH, ANYWAY, write and update
+	- hash tables use text.h to read a table from a text file
+	- removed char escaping from literal & .dic hashes and string values
+	- removed commenting out from .dic hashes
+	- added char escaping to TTSCP setl and setg cmd values
+	- switched the order of text file processing to:
+		encoding, directives, escaping
+	- renamed getline to get_line (and rewrote it as above)
+	- fixed text::rewind() and some related D_PRINTS
+	- changed some printf's to D_PRINT's
+	- (Cz) partly fixed short.dic (several problems), see also trans.rul
+	- added a documentation section on the overall architecture
+
+2.5.19 from 2.5.18	 6.11.03
+	- fixed hash table filename and line no. reporting
+	- fixed unit::subst(): largest match now goes first
+	- fixed unit::relabel(): largest match now goes first
+	- fixed a cfg reload bug in encoding.cc
+	- fixed a double free buf in ~lang
+	- fixed memory leaks: text::superfile and config_release() etc.
+	- fixed when a_input::run is scheduled, but read returns EAGAIN
+	- slabified parser and sched_aq
+	- fixed slab leak reporting
+	- speed optimizations of critical spots (inlines, booltab->always)
+	- (Cz) completely new and better main.dic, short.dic
+		(suggested by Pavel Machek)
+	- (Cz) optimizations (numerals) and fixes (infinite substs)
+	- (Cz) several "near" optimizations and soft opts to skip some rules
+	- (Cz) nonsyl.dic -> nonsyllprep.dic; introduced interj.dic
+	- (Cz) unified the stress unit establishment rules to stress.rul
+	- (Cz) joined the two stress grouping substs (relabels)
+	- (Cz) stopped to "support" the naive prosody
+	- gauge now sends items out in comma separated batches
+	- gauge made always to send out options to skip inessential rules
+	- gauge -t
+	- new synchronous sgets(), strace friendly, faster, space hungry
+	- O_LIST options (currently languages, voices and soft_options)
+	- moved scope and dbg tag logic from block_rule::apply_current
+		to rule::cook(), which fixes rules not directly in blocks
+	- removed M_BEGIN, M_END, M_SEQ from unit::subst() and elsewhere
+	- arch/unix/upload to support "make upload" to SourceForge
+	- "make cfginst" (available from the src subdir)
+	- exceptions are now properly deallocated (hopefully)
+	- the ttscp command help files work again
+	- changed some file owners, groups and modes (to non-root)
+	- utterance chunking made aggresive - max_utterance, split_utterance
+
+2.5.20 from 2.5.19	11.11.03
+	- some configure.in tests fixed (reported by Mirek Trmac)
+	- simplified options.lst (source code names = user names)
+	- fixed the  with !"... ..."    word splitting bug
+	- fixed two 0 disappearances in the rules
+	- r_regress and r_progress now use ABSENT_CHAR instead of '0'
+
+2.5.21 from 2.5.20	27.11.03
+	- fastmatch optimization speeds up subst rules in VERY large scope units
+	- gather now returns in gb and gblen 
+	- (Cz) related and other main.dic fixes
+	- (Cz) fixes related to characters from mathsign.dic, dollars etc.
+	- a_accept now has no context of its own, but has "listening"
+	- ~configuration is now no duplicate for free_all_options()
+	- fixed theimer's n_segs to 441
+	- several fixes connected with the reinitialization
+	- say -r now properly times out
+	- rule::whole_tag buffer made static
+	- removed arch/win/cpconv2.exe and made the conversion optional
+	- fixed a mysterious order dependency bug in wavefm::flush()
+		(reported by Larry Gilbert)
+	- text preprocessor now by default strips leading and trailing whitespace
+	- after a fatal bug, don't complain about slab's lost cells
+	- parser::depth (to fix downgradable character disappearances)
+	- an attempt at a THANKS file
+
+2.5.22 from 2.5.21	10.1.04
+	- (Cz) main.dic improvements
+	- gauge -b
+	- cfg/Makefile.am now only installs and distributes listed files
+	- likewise for arch
+	- removed arch/win/*.enc, *.conv and added README.CODEPAGE
+	- make arch/unix/upload/upload a bit more atomic
+	- fallback_mode option (see docs) (addresses default voice problems)
+	- added WELCOME and several files in doc to EXTRA_DIST
+	- init_time option fixed (now works for 2+ seconds)
+	- TTSCP header documented not to be terminated by an empty line (Mirek)
+	- (Cz, Sk) "female" soft option to indicate voice gender
+	- removed pseudo root dir "root" from the distribution
+
+2.5.23 from 2.5.22	16.2.04
+	- Win32 portability fixes, getcwd replacement, arch/version.h
+	- the derived HTML documentation is no longer distributed
+	- split epos.h off common.h
+	- reorganized the hash table code
+	- eposm is now noinst and displays an obsolescence notice
+	- improved WELCOME and cfg/inv/README
+	- due to an automake upgrade: AM_LDFLAGS instead of LDFLAGS
+	- due to an autoconf upgrade: got rid of acconfig.h, quoting
+	- renamed configure.in to configure.ac
+	- configuration::get__sd_in/out() sockified access functions
+
+2.5.24 from 2.5.23	5.9.04
+	- reorganized struct unit data items to make the struct smaller
+	- some fixes and workarounds for g++ 3.4 (Andreas Jochens)
+	- mmsystem fix - loop on an active buffer
+
+2.5.25 from 2.5.24	25.2.05
+	- fastmatch initialization fixed to be linear in dictionary size
+	- better error handling if fastmatch regex doesn't compile
+
+2.5.26 from 2.5.25	26.2.05
+	- morphoanalyzer fix - used to be confused by buffer space past the input
+	- DO_PRINTs not allowed by a  make distcheck
+
+2.5.27 from 2.5.26	 9.3.05
+	- better error reporting for MBROLA voices when fed by the traditional segment string
+	- fixed literal zero vs. absent char handling in syll and seg rules and some D_PRINTs
+
+2.5.28 from 2.5.27	 8.4.05
+	- binaries renamed to eposd, say-epos, gauge-epos; gauge-epos made noinst
+	- default installation prefix changed to /usr/local
+	- arch/unix/difftgz produces version-to-version diffs of Epos dists
+	- fix: survive when a remote TTSCP server returns 0 bytes
+	- fix: r-machac and r-violka were not configured
+	- error reporting improvements
+	- r_fail (to report cfg errors from within rules)
+	- fix: a dph file selection was not selected for remote voices
+	- FAQ started
+	- preload_voices feature drops unusable voices at startup
+	- encode_string refactoring towards UTF-8
+	- fix: a_seg used to terminate prematurely after 2048 segments
+	- select_local_soundcard() to choose e.g. between OSS and portaudio at startup
+	- portaudio support (by Adam Nohejl)
+	- Mac OS X port (by Adam Nohejl)
+	- LPC and TDP synthesizers support LE inventories on big-endians (by Adam Nohejl)
+	- regex moved to libs (may break some ports)
+	- included portaudio to support Mac, --enable-portaudio to configure
+	- say-epos option -z to print the TTSCP exchange
+	- gcc 3.4 fix - moved Min/Max templates into nnet/vector.h (suggested by Karl Chen)
+	- all files made root-owned and world-writable
+2.5.29 from 2.5.28	26.4.05
+	- Latin language (the 4 prominent continental pronunciation standards)
+	- fastmatch_substs made optional (and disabled by default) to speed up startup
+	- some fixes for g++ 4.0 and 64-bit pointers (Andreas Jochens)
+	- syll rule can now do general multilevel splits
+	- fix: recode substs with the end-of-string marker $
+	- minor error reporting improvements
+	- trivi fix in configure.ac when --enable-portaudio=yes
+	- reinit fixes
+	- say-epos -r fixes
+	- vrfy.cc broken up into automake-driven individual tests
+	- Vogon language (unit testing infrastructure)
+	- FAQ: report bugs by writing the tests
+	- say-epos option -x to turn off the synthesis (transcribe only)
+2.5.30 from 2.5.29	24.5.05
+	- Win fix: #define FORGET_PORTAUDIO 1
+	- doc fixes (wrt default install path, PortAudio, Mac OS X)
+	- r_absol reshaped as a hashing_rule
+	- average phone length databases based on two corpora
+		(affects mbrsyn voices for better or for worse)
+
+2.5.31 from 2.5.30	25.5.05
+	- Mac OS X (big endian) fixes
+
+2.5.32 from 2.5.31	30.5.05
+	- SAMPA (including alternates) supported as a regular encoding
+	- all natural text buffers are now allocated with extra space for decoding
+	- more refactoring towards UTF-8 support, needs just the routines now
+	- fix: previously did not properly decode option values in TTSCP show
+	- fix: uninitialized SAMPA decoder tables
+	- doc fixes
+
+2.5.33 from 2.5.32	20.6.05
+	- fixed several TTSCP show command related bugs: segfaults, leading colons, omitted spaces
+	- fixed unassigned external variables: segfaults
+	- fix: settings associated with a headerless ulaw used to be permanent
+	- fixed the behavior after some data connection writing errors (used to deadlock)
+	- reinit fix when being started from root (all bugs reported by Adam Nohejl)
+
+2.5.34 from 2.5.33	30.6.05
+	- fix: one more deadlock (on errors while detaching waveform)
+	- fix: response to some pseudoempty inputs
+	- fix: appl 0 is now forbidden
+
+2.5.35 from 2.5.34	 2.7.05
+	- adjusted n_segs and betty.dph for tdi-based voices to cover recent segment additions
+		(in machac.tdi and violka.tdi - upgrade those to the GPL'd versions)
+	- fix: response to some pseudoempty inputs on big-endians
+
+2.5.36 from 2.5.35	9.8.05
+	- fix: DESTDIR support (Jeremy Huddleston)
+	- fix: removed the unused and non-portable hash to hostent in hashi.cc
+
+2.5.37 from 2.5.36	24.3.06
+	- gcc 4.1 fix: extra qualification (Martin MichlMayr)

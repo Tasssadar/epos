@@ -1,0 +1,54 @@
+#
+#	These lengths are averages from a prosodic corpus.
+#
+#	(c) 2005 Petr Horak, horak@ure.cas.cz
+#
+
+a 77
+e 70
+i 69
+o 65
+u 71
+
+á 162
+é 122
+í 98
+ó 100
+ú 129
+
+b 82
+d 65
+ï 75
+g 76
+p 78
+t 82
+» 94
+k 83
+
+v 56
+z 82
+¾ 91
+h 68
+ø 76
+f 85
+s 113
+¹ 119
+x 99
+Ø 77
+
+Z 136
+® 136	# This is artificial, based on Z.  We had 0 occurrences.
+c 124
+è 125
+
+j 45
+l 47
+r 57
+
+m 75
+n 60
+N 80
+ò 61
+
+A 154
+O 131

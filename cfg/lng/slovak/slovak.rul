@@ -1,0 +1,42 @@
+#
+#	(c) 2001 Jirka Hanika
+#
+#	Pravidla vytvoøená Martinem Petriskou se nacházejí v adresáøi slovak.prev
+#
+	
+if    a_colons	sent
+{
+	# pøidat èárku pøed "a":
+	with  "a"  word
+	{
+		regress a>\X(!_!)
+	}
+	raise	\X:!		word	phone
+	syll	\X<\ _		colon   word
+	regress \X>\ (!_!)	colon	word
+	regress \X>a(!_!)
+}
+
+@include "trans.rul"
+
+@include "../czech/prosody.rul"
+
+if    phr_break
+{
+	regress   0>\#(!_0)	colon	; vlo¾ení pausy
+	inside	\#	phone
+	{
+		contour   t/-65   phone
+		contour   i/-99   phone
+	}
+	5x  regress   0>\#(!_0)	sent	; vlo¾ení pausy
+}
+
+regress |>0(!_!)	colon	phone
+
+if    slovak_dph
+	segments  slovak.dph	colon
+if    !slovak_dph
+{
+	segments  traditnl.dph 		colon
+}

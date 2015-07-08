@@ -1,0 +1,11 @@
+# zkracování isolovaných taktù podle poètu slabik - ipcz
+
+#(unused)
+
+t/*:1	+33
+t/*:2	  0
+t/*:3	-15
+t/*:4	-25
+t/*:5	-31
+t/*:*	-33
+

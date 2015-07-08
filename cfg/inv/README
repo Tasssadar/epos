@@ -1,0 +1,29 @@
+
+Voice inventories, which are grouped in subdirectories of this directory,
+are distributed separately as their development is fully independent
+of the development of Epos itself: they differ from Epos and from each other
+in authorship, licensing conditions, testing methodology, size and some
+special features.
+
+There is a single exception, the kubec-vq and vichova-vq voices.
+It is possible to include them because they are licensed under GPL by their
+copyright owner (Institute for Radio Engineering and Electronics of the
+Czech Academy of Sciences), and because they are very small
+(25 kB uncompressed each).
+These voices can be used by the impatient to hear some speech before
+downloading any better voices, but there is the expectable relation
+between size and quality.
+
+Additional voices are available to the on-line users of Epos without
+being downloaded, namely the "remote" voices which use a public
+TTSCP server to do the synthesis and therefore need no local speech
+inventories.  This is useful when trying out Epos at an on-line
+computer.
+
+Questions concerning the availability of specific high quality
+inventories should be sent to epos@speech.cz.
+
+Please refer to */README* files concerning the licensing conditions
+of files in subdirectories of this directory.
+
+

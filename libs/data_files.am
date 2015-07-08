@@ -1,0 +1,8 @@
+DATA_FILES = portaudio			\
+portaudio/README			\
+regex					\
+regex/rx.c				\
+regex/rx.h				\
+regex/Makefile.am			\
+regex/Makefile.in			\
+README

@@ -1,0 +1,53 @@
+
+Files in this package
+
+This file tends to be incomplete and/or severely outdated.
+
+
+The files usually located in the "cfg" directory may be moved
+elsewhere using epos.ini.
+
+/usr/local/share/epos/cfg		various global configuration files read by Epos
+/usr/local/share/epos/lng/*		various language specific cfg files
+/usr/local/share/epos/voice/*		various voice specific cfg files
+/usr/local/share/epos/inv/*		various segment inventory stuff, to be installed
+					separately!
+/usr/local/share/epos/lng/*/*.dic	various word lists &c, used by the current rules
+/usr/local/share/epos/lng/*/*.dp[ht]	descriptions of segment inventories, used by the rules
+/usr/local/share/epos/cfg/fixed.ini	presumably never-changing (but changeable) parameters
+/usr/local/share/epos/cfg/epos.ini	presumably often changing tunable parameters
+/usr/local/share/epos/cfg/ansi.ini	if selected in fixed.ini, defines ANSI color output
+/usr/local/share/epos/cfg/rtf.ini	if chosen in fixed.ini, defines Rich Text Fmt output
+
+/var/log/epos		system wide log of TTSCP transactions of the daemon
+			(still useful mostly for debugging)
+
+/var/run/epos.pwd	system wide epos supervisor password
+
+doc			various documentation
+doc/*.sgml		Epos documentation source text in SGML (linuxdoc dtd)
+			Type "make epos.dvi", "make epos.html" or "make epos.txt"
+			to generate the other documentation formats
+doc/epos.dvi		complete Epos documentation, nicely typeset
+doc/epos.txt		complete Epos documentation in plain text (read with "more")
+doc/epos*.html		complete Epos documentation in HTML
+Changes			what is new, improved or newly broken in this version
+			how old are the individual features of Epos
+doc/Todo		things I'd add/change if I knew how and had the time
+doc/Files		(this file)
+doc/FAQ			Frequently Asked Questions.  No questions qualified as yet.
+doc/COPYING		the GNU license - distribution conditions
+
+src/*.cc		C++ source files for Epos and simple clients
+src/options.lst		list of various runtime options. Gets #included twelve times.
+
+arch			things that don't fit elsewhere, scripts et alia
+arch/dos		DOS related configuration files
+arch/dos/README.dos	how to compile the DOS package
+arch/unix		mostly shell scripts; should approx. work on any UNIX OS
+arch/unix/makedate	print last modification time of the sources
+arch/win		MS Windows (95,98,2000, NT, XP) configuration files
+arch/win/configure.bat	run before touching files with the Visual C++ compiler
+arch/win-ce		MS Windows CE configuration files
+
+

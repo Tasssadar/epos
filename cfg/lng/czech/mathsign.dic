@@ -1,0 +1,27 @@
+
+# pøíklad øe¹ení jednoduchých znaèek; dolar a støí¹ka tu být nesmìjí
+
++	~plus~
+\d	~teèka~
+\-	~a¾~
+\m	~mínus~
+=	~rovná~se~
+/	~lomeno~
+\@	~zavináè~
+(	~závorka~
+)	~závorku~uzavøít~
+[	~hranatá~závorka~
+]	~hranatou~uzavøít~
+{	~slo¾ená~závorka~
+}	~slo¾enou~uzavøít~
+&	~et~
+*	~hvìzdièka~
+%	~procent~
+_	~podtr¾ítko~
+'	~apostrof~
+"	~uvozovky~
+`	~zpìtný~apostrof~
+\\	~zvrácené~lomítko~
+<	~men¹í~
+>	~vìt¹í~
+\#	~kód~

@@ -1,0 +1,27 @@
+
+# pøíklad øe¹ení jednoduchých znaèek; dolar a støí¹ka tu být nesmìjí
+
++	~plus~
+\d	~punctum~
+\-	~bis~
+\m	~mínus~
+=	~sígnum~aequátiónis~
+/	~fráctulus~
+\@	~sígnum~convolútum~
+(	~uncínus~
+)	~uncínus~clausus~
+[	~uncínus~angulátus~
+]	~uncus~clausus~
+{	~uncínus~fráctus~
+}	~uncus~clausus~
+&	~et~
+*	~stelula~
+%	~percent~
+_	~subscriptum~
+'	~virgula~
+"	~sígnum~citatiónis~
+`	~virgula~perversa~
+\\	~fráctulus~perversus~
+<	~uncínus~fráctus~
+>	~uncínus~fráctus~clausus~
+\#	~númerus~

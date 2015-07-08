@@ -1,0 +1,10 @@
+# zkracování taktù v souvislé øeèi podle poètu slabik - ipcz
+
+# (unused)
+
+t/*:1	+8
+t/*:2	 0
+t/*:3	-5
+t/*:4	-8
+t/*:*  -10
+

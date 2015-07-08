@@ -1,0 +1,171 @@
+<perceptronStructure>
+    <trainProcedure value="stableConjugateGradient"/>
+    <weightInitProcedure value="random"/>
+    <allRecurrentConnections>
+        <recurrentConnections>
+            <start>
+                <layer value="1"/>
+                <to value="-50"/>
+            </start>
+            <end>
+                <layer value="1"/>
+                <to value="-100"/>
+            </end>
+        </recurrentConnections>
+    </allRecurrentConnections>
+    <connectionRestriction value="layered"/>
+    <dumpWeightsDelimiter value=";"/>
+    <logErrors value="errors.txt"/>
+    <params>
+        <learningRate value="0.0273017"/>
+        <epsilon value="1e-05"/>
+        <zeta value="1.5"/>
+        <c value="0.5"/>
+        <h value="0.005"/>
+        <mi value="0.001"/>
+        <mi_i value="2"/>
+        <mi_d value="0.6"/>
+    </params>
+    <layerSizes value="24-5-5-1"/>
+    <layerTransferFuncs value="logsig-logsig-linear"/>
+    <weights>
+        <stream value="0.029095;-0.0576822;-0.407039;0.301589;-0.143025;-0.19877;-0.271268;-0.304914;-0.103018;-0.0130597;0.0108465;0.188249;-0.0321937;-0.0540705;-0.107995;0.0307465;0.238675;-0.0871138;-0.237298;-0.29094;-0.124285;-0.123671;-0.158261;0.461647;0.0408816;0.25157;-0.250562;-0.0285431;0.204064;-0.0101875;-0.159165;0.0711573;0.0514115;-0.106125;-0.189794;0.0461215;0.301669;-0.014814;0.325467;0.448995;0.0478838;0.189406;0.0952594;-0.466878;-0.163843;-0.340915;-0.0715031;0.424039;0.0441478;0.123224;-0.256035;0.0337932;-0.155297;-0.193698;-0.343332;0.394034;0.0203802;0.0718102;0.177269;-0.402584;0.841301;0.347954;0.042604;0.629388;-0.266188;0.165709;0.385838;-0.187366;0.161569;-0.193297;-0.564731;-0.237114;-0.351101;-0.0712307;-0.127124;0.131481;0.159016;-0.172378;0.0777474;-0.614206;0.18703;-0.0306999;0.219509;-0.162536;0.208016;0;-0.353239;0.00305786;-0.0392736;0.00363019;0.00902239;0.230171;0.0559849;0.413329;0.242562;0.220334;-0.0166264;0.0207502;-0.0729103;-0.534463;0.209093;0.0277487;-0.192025;-0.114894;0.166324;0.104988;0.0173839;-0.0283949;0.126444;-0.0738847;-0.410504;0.152456;0.461832;-0.151327;-0.0461634;0.822907;-0.0724758;-0.0775504;0.696799;-0.0432273;0.409096;0.254456;0.0939211;0.139898;0.684019;0.116631;-0.359931;-1.11726;0.397639;-0.46901;-0.596857;0.348263;0.550001;-0.6377;-0.290677;-0.0926596;0.12942;-0.0667177;-0.4479;0.0791346;0.373847;-0.175595;0.458235;0.0668359;0.294264;0.46578;-1.72306;-0.209093;1.15148;-0.16128;-0.490927;-0.413381;0.954437;0.696277;-0.313851;0.421874;0.0709983;0.430535;0.312839;-0.464297;0.190685;-0.537347;0.255558;0;-1.59946;-0.330863;1.18577;-0.299829;-0.382973;-0.482839;1.88622;0.235104;-1.17332;1.90745;-0.264702;0.172274">
+            <type value="local"/>
+            <encoding value="text"/>
+            <delimiter value=";"/>
+        </stream>
+    </weights>
+    <trainingData>
+        <columns>
+            <column>
+                <use value="no"/>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="float"/>
+                <maxR value="1"/>
+                <window>
+                    <left value="2"/>
+                    <right value="0"/>
+                    <empty value="0"/>
+                </window>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="1.00003"/>
+                <avg value="2.71868"/>
+                <window>
+                    <left value="2"/>
+                    <right value="0"/>
+                    <empty value="0"/>
+                </window>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="0.275564"/>
+                <avg value="0.72104"/>
+                <window>
+                    <left value="2"/>
+                    <right value="0"/>
+                    <empty value="0"/>
+                </window>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="float"/>
+                <maxR value="1"/>
+                <window>
+                    <left value="2"/>
+                    <right value="0"/>
+                    <empty value="0"/>
+                </window>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="float"/>
+                <maxR value="1"/>
+                <window>
+                    <left value="2"/>
+                    <right value="0"/>
+                    <empty value="0"/>
+                </window>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="1.65695"/>
+                <avg value="4.00946"/>
+                <window>
+                    <left value="2"/>
+                    <right value="0"/>
+                    <empty value="0"/>
+                </window>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="0.291585"/>
+                <avg value="0.665893"/>
+                <window>
+                    <left value="2"/>
+                    <right value="0"/>
+                    <empty value="0"/>
+                </window>
+            </column>
+            <column>
+                <use value="input"/>
+                <type value="float"/>
+                <translate value="float"/>
+                <maxR value="1"/>
+                <window>
+                    <left value="2"/>
+                    <right value="0"/>
+                    <empty value="0"/>
+                </window>
+            </column>
+            <column>
+                <use value="output"/>
+                <type value="float"/>
+                <translate value="linear"/>
+                <stdev value="14187.2"/>
+                <avg value="768.355"/>
+            </column>
+        </columns>
+        <trainingDataFiles>
+            <file>
+                <streams>
+                    <stream value="nnseries.txt">
+                        <type value="remote"/>
+                        <encoding value="text"/>
+                        <delimiter value="tab"/>
+                    </stream>
+                </streams>
+            </file>
+        </trainingDataFiles>
+        <ranges>
+            <range>
+                <from value="0"/>
+                <to value="-67"/>
+                <type value="train"/>
+            </range>
+            <range>
+                <from value="0"/>
+                <to value="0"/>
+                <type value="eval"/>
+                <rest value="1"/>
+            </range>
+        </ranges>
+        <series value="36"/>
+        <seriesSeparator value="------------------------------------------"/>
+        <dumpCfg value="results/trdata_%.txt"/>
+    </trainingData>
+</perceptronStructure>
