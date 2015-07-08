@@ -342,7 +342,7 @@ unit::insert(UNIT target, bool backwards, char what, charclass *left, charclass 
 	static int sharpcnts = 0;
 	if (depth == target) {
 		if(what == '#') {
-			if(++sharpcnts >= 350)
+			if(++sharpcnts >= 1600)
 				return;
 		} else {
 			sharpcnts = 0;
